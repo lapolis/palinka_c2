@@ -1,8 +1,10 @@
 import sys
 import threading
 
-from flask import Flask, render_template
+from random import choice
+from string import ascii_letters
 from multiprocessing import Process
+from flask import Flask, render_template, request
 
 aa = 'banane'
 
@@ -24,6 +26,15 @@ def index():
 @app.route('/lol', methods=['GET'])
 def lol():
     return "Hollo thoro!", 200
+
+@app.route('/beacon/register', methods=['POST'])
+def register():
+    beacon_name = ''.join(choice(ascii_letters) for i in range(10))
+    beacon_ip = request.remote_addr
+    beacon_hostname = request.form.get("name")
+    beacon_type = request.form.get("type")
+    success(f'New undercover agent {beacon_name}.')
+    return (beacon_name, 200)
 
 @app.errorhandler(404)
 def page_not_found(error):

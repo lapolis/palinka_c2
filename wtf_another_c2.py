@@ -54,14 +54,8 @@ def main():
     listeners['list_one'] = HTTP_listener('Flask_listener', '127.0.0.1', 9090)
     listeners['list_one'].start()
 
-    listeners['list_two'] = HTTP_listener('Flask_listener', '127.0.0.1', 9091)
-    listeners['list_two'].start()
-
     input('stop one')
     listeners['list_one'].stop()
-
-    input('stop two')
-    listeners['list_two'].stop()
 
 if __name__ == '__main__':
     main()
