@@ -6,8 +6,15 @@ import datetime
 import requests
 import configparser
 
+from time import sleep
+
 import logging
 from core.mame import *
+
+from collections import OrderedDict
+
+from core.listener import HTTP_listener
+
 from os import system, path
 from platform import python_version
 from colorama import Fore, Back, Style
@@ -35,10 +42,26 @@ from colorama import Fore, Back, Style
 #     ''')
 
 def main():
-  log = logging.getLogger('mainLogs')
-  log.disabled = False
+    log = logging.getLogger('werkzeug')
+    # to fix (disable ALL logs)
+    # log.setLevel(logging.ERROR)
+    log.disabled = False
 
-  
+    listeners = OrderedDict()
+
+    # listeners[name] = Listener(name, port, ipaddress)
+    # listeners[name].start()
+    listeners['list_one'] = HTTP_listener('Flask_listener', '127.0.0.1', 9090)
+    listeners['list_one'].start()
+
+    listeners['list_two'] = HTTP_listener('Flask_listener', '127.0.0.1', 9091)
+    listeners['list_two'].start()
+
+    input('stop one')
+    listeners['list_one'].stop()
+
+    input('stop two')
+    listeners['list_two'].stop()
 
 if __name__ == '__main__':
-  main()
+    main()
