@@ -33,10 +33,10 @@ class Stash :
     def db_init(self):
         # create_sql = []
         # create_sql.append( """ PRAGMA foreign_keys = ON; """ )
-        sql_stash( """ PRAGMA foreign_keys = ON; """ )
+        self.sql_stash( """ PRAGMA foreign_keys = ON; """ )
 
         ## AGENTS
-        sql_stash(""" CREATE TABLE IF NOT EXISTS agents (
+        self.sql_stash(""" CREATE TABLE IF NOT EXISTS agents (
         agent_name TEXT PRIMARY KEY, \
         listener_name TEXT, \
         remote_ip TEXT, \

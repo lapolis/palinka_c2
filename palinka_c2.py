@@ -66,7 +66,7 @@ def main():
     listeners = OrderedDict()
     # listeners[name] = Listener(name, port, ipaddress)
     # listeners[name].start()
-    listeners['list_one'] = HTTP_listener('Flask_listener', '0.0.0.0', 9090, db)
+    listeners['list_one'] = HTTP_listener('main_listener', '0.0.0.0', 9090, db)
     listeners['list_one'].start()
 
     input('stop one')

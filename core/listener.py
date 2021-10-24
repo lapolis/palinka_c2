@@ -36,13 +36,13 @@ class HTTP_listener:
             beacon_type = request.form.get("type")
 
             success(f'New undercover agent {beacon_name}.')
-            fields = (beacon_name, self.name, beacon_ip, beacon_hostname, beacon_type,)
+            fields = (beacon_name, self.name, beacon_ip, beacon_hostname, beacon_type)
             self.stash.sql_stash( """INSERT INTO agents(agent_name, \
                                                         listener_name, \
                                                         remote_ip, \
                                                         hostname, \
                                                         beacon_type, \
-                                                        enc_key ) VALUES( ?,?,?,?,?,? )""", fields )
+                                                        enc_key ) VALUES( ?, ?, ?, ?, ?, ? )""", fields )
             return (beacon_name, 200)
         
         @self.app.errorhandler(404)
