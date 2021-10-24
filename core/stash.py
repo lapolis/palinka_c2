@@ -23,7 +23,10 @@ class Stash :
 
         try:
             c = conn.cursor()
-            c.execute( sql_query , sql_values )
+            if sql_values != None:
+            	c.execute(sql_query , sql_values)
+            else:
+            	c.execute(sql_query)
         except Error as e:
             error(e)
 
