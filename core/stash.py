@@ -47,6 +47,15 @@ class Stash :
         beacon_type TEXT, \
         enc_key TEXT); """)
 
+        self.sql_stash(""" CREATE TABLE IF NOT EXISTS commands (
+        agent_name TEXT, \
+        enc_command TEXT); """)
+
+        self.sql_stash(""" CREATE TABLE IF NOT EXISTS commands_history (
+        agent_name TEXT, \
+        clear_command TEXT, \
+        clear_out TEXT); """)
+
         # # TESTING
         # create_sql.append( """ CREATE TABLE IF NOT EXISTS testing (
         # target TEXT, \
