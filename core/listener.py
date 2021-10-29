@@ -17,6 +17,7 @@ class HTTP_listener:
         self.port = port
 
         self.stash = stash
+        ## to fix (this one will change at each round!! and the first one maybe created at listener init!!)
         self.key = 'CIpAysYcPFRXEtalHHsll4_uQsG4vSQXwWhyoywDwnc' 
 
         ## to fix
@@ -45,6 +46,16 @@ class HTTP_listener:
                                                          beacon_type, \
                                                          enc_key ) VALUES( ?, ?, ?, ?, ?, ? )""", fields )
             return (beacon_name, 200)
+
+        @self.app.route('/task/<name>', methods=['GET'])
+        def getinTask(name):
+            tasks_a = self.stash.get_task(name)
+            tasks = ' ---===--- '.join(tasks_a)
+            self.stash.del_commands(name)
+            if tasks:
+                return (tasks, 200)
+            else:
+                return (tasks, 204)
         
         @self.app.errorhandler(404)
         def page_not_found(error):
