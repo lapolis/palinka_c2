@@ -47,8 +47,8 @@ def main():
     ## remove flask logs
     log = logging.getLogger('werkzeug')
     # to fix (disable ALL logs)
-    # log.setLevel(logging.ERROR)
-    log.disabled = False
+    log.setLevel(logging.ERROR)
+    log.disabled = True
 
     ## create folders
     out_fold = path.join(getcwd(), 'stash')
@@ -60,13 +60,11 @@ def main():
     db.db_init()
 
 
-
-
-
     listeners = OrderedDict()
     # listeners[name] = Listener(name, port, ipaddress)
     # listeners[name].start()
-    listeners['list_one'] = HTTP_listener('main_listener', '0.0.0.0', 9090, db)
+
+    listeners['list_one'] = HTTP_listener('main_listener_lol', '0.0.0.0', 9090, db)
     listeners['list_one'].start()
 
     input('stop one')
