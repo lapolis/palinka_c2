@@ -15,8 +15,7 @@ class AESCipher:
         return s + (self.bs - len(s) % self.bs) * "\x00"
 
     def unpad(self, s):
-        print(s)
-        # s = s.decode('utf-8')
+        s = s.decode('utf-8')
         return s.rstrip('\x00')
 
     def encrypt(self, raw):

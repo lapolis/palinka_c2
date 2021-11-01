@@ -55,8 +55,8 @@ class Stash :
         self.sql_stash(""" CREATE TABLE IF NOT EXISTS commands_history (
             agent_name TEXT, \
             command_code TEXT PRIMARY KEY, \
-            clear_command TEXT, \
-            clear_out TEXT, \
+            command TEXT, \
+            output TEXT, \
             time_stamp DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')) ); """)
 
         self.sql_stash(""" CREATE TABLE IF NOT EXISTS key_store (
@@ -118,3 +118,10 @@ class Stash :
             error(e)
 
         conn.close()
+
+
+
+## command history
+## insert into commands_history(command_code,agent_name,command,output) VALUES("oooogy78","adadasddsa","command one yeah lol","");
+## commands
+## insert into commands(command_code,agent_name,command) VALUES("wwwwgy78","adadasddsa","ls");

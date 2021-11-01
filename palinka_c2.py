@@ -18,7 +18,7 @@ from core.stash import Stash
 
 from platform import python_version
 from colorama import Fore, Back, Style
-from os import system, path, getcwd,makedirs
+from os import system, path, getcwd, makedirs
 
 
 # system('clear')
@@ -51,9 +51,13 @@ def main():
     log.disabled = True
 
     ## create folders
-    out_fold = path.join(getcwd(), 'stash')
+    cwd = getcwd()
+    out_fold = path.join(cwd, 'stash')
     if not path.isdir(out_fold):
         makedirs(out_fold)
+    dow_fold = path.join(cwd, 'downloads')
+    if not path.isdir(dow_fold):
+        makedirs(dow_fold)
 
     # to fix - arg for project name
     db = Stash(path.join(out_fold, 'PROJECT_NAME' + '.db'))
