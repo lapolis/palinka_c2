@@ -47,8 +47,8 @@ def main():
     ## remove flask logs
     log = logging.getLogger('werkzeug')
     # to fix (disable ALL logs)
-    log.setLevel(logging.ERROR)
-    log.disabled = True
+    # log.setLevel(logging.ERROR)
+    log.disabled = False
 
     ## create folders
     cwd = getcwd()
@@ -68,7 +68,7 @@ def main():
     # listeners[name] = Listener(name, port, ipaddress)
     # listeners[name].start()
 
-    listeners['list_one'] = HTTP_listener('main_listener_lol', '0.0.0.0', 9090, db)
+    listeners['list_one'] = HTTP_listener('main_listener_lol', '192.168.0.28', 9090, db)
     listeners['list_one'].start()
 
     input('stop one')
