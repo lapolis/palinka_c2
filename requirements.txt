@@ -1,2 +1,3 @@
 pycryptodome
 flask
+simple-term-menu

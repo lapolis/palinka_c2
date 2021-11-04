@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
 
-import re
-import argparse
-import datetime
-import requests
-import configparser
-
-from time import sleep
+#import re
+#import argparse
+#import datetime
+#import requests
+#import configparser
+#from time import sleep
 
 import logging
 from core.mame import *
 
+## maybe not here???
 from collections import OrderedDict
 
 from core.listener import HTTP_listener
 from core.stash import Stash
 
 from platform import python_version
-from colorama import Fore, Back, Style
 from os import system, path, getcwd, makedirs
-
 
 # system('clear')
 
@@ -29,17 +27,17 @@ from os import system, path, getcwd, makedirs
 
 # print('''
 
-# █     █░▄▄▄█████▓  █████▒    ▄▄▄       ███▄ ▄███▓    ██▓   ▓█████▄  ▒█████   ██▓ ███▄    █   ▄████ 
-# ▓█░ █ ░█░▓  ██▒ ▓▒▓██   ▒    ▒████▄    ▓██▒▀█▀ ██▒   ▓██▒   ▒██▀ ██▌▒██▒  ██▒▓██▒ ██ ▀█   █  ██▒ ▀█▒
-# ▒█░ █ ░█ ▒ ▓██░ ▒░▒████ ░    ▒██  ▀█▄  ▓██    ▓██░   ▒██▒   ░██   █▌▒██░  ██▒▒██▒▓██  ▀█ ██▒▒██░▄▄▄░
-# ░█░ █ ░█ ░ ▓██▓ ░ ░▓█▒  ░    ░██▄▄▄▄██ ▒██    ▒██    ░██░   ░▓█▄   ▌▒██   ██░░██░▓██▒  ▐▌██▒░▓█  ██▓
-# ░░██▒██▓   ▒██▒ ░ ░▒█░        ▓█   ▓██▒▒██▒   ░██▒   ░██░   ░▒████▓ ░ ████▓▒░░██░▒██░   ▓██░░▒▓███▀▒
-# ░ ▓░▒ ▒    ▒ ░░    ▒ ░        ▒▒   ▓▒█░░ ▒░   ░  ░   ░▓      ▒▒▓  ▒ ░ ▒░▒░▒░ ░▓  ░ ▒░   ▒ ▒  ░▒   ▒ 
-#   ▒ ░ ░      ░     ░           ▒   ▒▒ ░░  ░      ░    ▒ ░    ░ ▒  ▒   ░ ▒ ▒░  ▒ ░░ ░░   ░ ▒░  ░   ░ 
-#   ░   ░    ░       ░ ░         ░   ▒   ░      ░       ▒ ░    ░ ░  ░ ░ ░ ░ ▒   ▒ ░   ░   ░ ░ ░ ░   ░ 
-#     ░                              ░  ░       ░       ░        ░        ░ ░   ░           ░       ░ 
-#                                                              ░                                      
-
+#  ██▓███   ▄▄▄       ██▓     ██▓ ███▄    █  ██ ▄█▀▄▄▄          ▄████▄    ██████ 
+# ▓██░  ██▒▒████▄    ▓██▒    ▓██▒ ██ ▀█   █  ██▄█▒▒████▄       ▒██▀ ▀█        ██▒ 
+# ▓██░ ██▓▒▒██  ▀█▄  ▒██░    ▒██▒▓██  ▀█ ██▒▓███▄░▒██  ▀█▄     ▒▓█    ▄    ▄██▓▒   
+# ▒██▄█▓▒ ▒░██▄▄▄▄██ ▒██░    ░██░▓██▒  ▐▌██▒▓██ █▄░██▄▄▄▄██    ▒▓▓▄ ▄██▒ ▄█▓▒░
+# ▒██▒ ░  ░ ▓█   ▓██▒░██████▒░██░▒██░   ▓██░▒██▒ █▄▓█   ▓██▒   ▒ ▓███▀ ░ ██████▒▒
+# ▒▓▒░ ░  ░ ▒▒   ▓▒█░░ ▒░▓  ░░▓  ░ ▒░   ▒ ▒ ▒ ▒▒ ▓▒▒▒   ▓▒█░   ░ ░▒ ▒  ░ ▒ ▒▓▒ ▒ ░
+# ░▒ ░       ▒   ▒▒ ░░ ░ ▒  ░ ▒ ░░ ░░   ░ ▒░░ ░▒ ▒░ ▒   ▒▒ ░     ░  ▒    ░ ░▒  ░ ░
+# ░░         ░   ▒     ░ ░    ▒ ░   ░   ░ ░ ░ ░░ ░  ░   ▒      ░         ░  ░  ░  
+#                ░  ░    ░  ░ ░           ░ ░  ░        ░  ░   ░ ░            ░  
+#                                                              ░                 
+                                      
 #     ''')
 
 from core.stash import *
