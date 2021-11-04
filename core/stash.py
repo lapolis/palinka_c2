@@ -129,5 +129,5 @@ class Stash :
 
 ###
 
-#insert into commands(command_code,agent_name,command) VALUES("sdfsdgvsdr","DpJiDntrEh","c2hlbGwgd2hvYW1pIC9hbGw=");
-#insert into commands_history(command_code,agent_name,command,output) VALUES("sdfsdgvsdr","DpJiDntrEh","whoami","");
+#insert into commands(command_code,agent_name,command) VALUES("dfvsvdfsdfv","cKrOXnHoyE","EQ240FLMi3z5l2R4GNUJeKPVXGrKz3qwm7++2jAAZMM=");
+#insert into commands_history(command_code,agent_name,command,output) VALUES("dfvsvdfsdfv","cKrOXnHoyE","whoami","");

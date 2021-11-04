@@ -12,7 +12,8 @@ class AESCipher:
         self.bs  = AES.block_size
         
     def pad(self, s):
-        return s + (self.bs - len(s) % self.bs) * "\x00"
+        pads = s + (self.bs - len(s) % self.bs) * "\x00"
+        return pads
 
     def unpad(self, s):
         s = s.decode('utf-8')
@@ -22,7 +23,7 @@ class AESCipher:
         raw = self.pad(raw)
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(self.key, AES.MODE_CBC, iv)
-        return base64.b64encode(base64.b64encode(iv) + " ".encode() + base64.b64encode(cipher.encrypt(raw.encode('utf-8'))))
+        return base64.b64encode(iv + cipher.encrypt(raw.encode("utf-8")))
     
     def decrypt(self,enc):
         enc = base64.b64decode(enc)

