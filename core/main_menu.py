@@ -24,12 +24,6 @@ class MainMenu :
     def __init__(self, stash):
         self.stash = stash
 
-        # self.kl = keyboard.GlobalHotKeys({
-        #     '<ctrl>+<right>': self.on_activate_r,
-        #     '<ctrl>+<left>': self.on_activate_l})
-        # self.kl.start()
-        # self.kl.stop()
-
         # general styling
         self.h_style = ('bg_green', 'fg_black', 'italics')
         self.h_kill_style = ('bg_red', 'italics')
@@ -59,6 +53,20 @@ class MainMenu :
 
         # print(len(self.menu_entry))
         # print(f'{slot}')
+        print('''
+ 
+  ██▓███   ▄▄▄       ██▓     ██▓ ███▄    █  ██ ▄█▀▄▄▄          ▄████▄    ██████ 
+ ▓██░  ██▒▒████▄    ▓██▒    ▓██▒ ██ ▀█   █  ██▄█▒▒████▄       ▒██▀ ▀█        ██▒ 
+ ▓██░ ██▓▒▒██  ▀█▄  ▒██░    ▒██▒▓██  ▀█ ██▒▓███▄░▒██  ▀█▄     ▒▓█    ▄    ▄██▓▒   
+ ▒██▄█▓▒ ▒░██▄▄▄▄██ ▒██░    ░██░▓██▒  ▐▌██▒▓██ █▄░██▄▄▄▄██    ▒▓▓▄ ▄██▒ ▄█▓▒░
+ ▒██▒ ░  ░ ▓█   ▓██▒░██████▒░██░▒██░   ▓██░▒██▒ █▄▓█   ▓██▒   ▒ ▓███▀ ░ ██████▒▒
+ ▒██░ ░  ░ ▒▒   ▓▒█░░ ▒░▓  ░░▓  ░ ▒░   ▒ ▒ ▒ ▒▒ ▓▒▒▒   ▓▒█░   ░ ░▒ ▒  ░ ▒ ▒▓▒ ▒ ░
+ ░▓▒░       ▒   ▒▒ ░░ ░ ▒  ░ ▒ ░░ ░░   ░ ▒░░ ░▒ ▒░ ▒   ▒▒ ░     ░  ▒    ░ ░▒  ░ ░
+ ░▒         ░   ▒     ░ ░    ▒ ░   ░   ░ ░ ░ ░░ ░  ░   ▒      ░         ░  ░  ░  
+  ░             ░  ░    ░  ░ ░           ░ ░  ░        ░  ░   ░ ░            ░  
+                                                              ░                 
+                                       
+    ''')
 
         high = f'{Fore.WHITE}{Style.BRIGHT}{Back.GREEN}'
         low = f'{Fore.GREEN}{Back.WHITE}'
@@ -66,17 +74,63 @@ class MainMenu :
         menu_entry = [f'{high}{e}{Style.RESET_ALL}' if menu_entry[self.index] == e else f'{low}{e}{Style.RESET_ALL}' for e in menu_entry]
         print(f'{Fore.WHITE}{Style.BRIGHT}{Back.BLACK}|{Style.RESET_ALL}'.join(menu_entry))
 
-        self.sub_init()
+        menu_to_show =  self.menu_entry[self.index]
+        if menu_to_show == 'Listeners':
+            self.listener_menu()
+        elif menu_to_show == 'Agents':
+            print('Agent Menu HERE!!')
+            self.listener_menu()
+        elif menu_to_show == 'Overview':
+            print('Overview Menu HERE!!')
+            self.listener_menu()
+        elif menu_to_show == 'Quit':
+            print('Quit Menu HERE!!')
+            self.quit_menu()
+        # self.sub_init()
 
     def menu_init(self):
         self.print_menu()
 
     ### sub menus
 
+    def quit_menu(self):
+        ### Listeners main menu
+        qm_title = '\n\n       Are you sure???\n'
+        qm_items = ['No!', 'No!', 'No!', 'Yes', 'No!', 'No!', 'No!']
+        qm_back = False
+        qm = TerminalMenu(
+            menu_entries=qm_items,
+            title=qm_title,
+            menu_cursor=self.cursor_kill,
+            menu_cursor_style=self.cursor_style_kill,
+            menu_highlight_style=self.h_kill_style,
+            cycle_cursor=True,
+            clear_screen=False,
+            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+        )
+
+        while not qm_back:
+            qm_sel = qm.show()
+
+            if qm.chosen_accept_key == 'ctrl-w':
+                self.on_activate_l()
+                qm_back = True
+            elif qm.chosen_accept_key == 'ctrl-e':
+                qm_back = True
+                self.on_activate_r()
+            else:
+                if qm_sel == 3:
+                    system('clear')
+                    qm_back = True
+
+
+
+
     def listener_menu(self):
         ### Listeners main menu
         lmm_title = '\n\n       Listeners Menu\n'
-        lmm_items = ['Show Listeners', 'Kill Listener', 'Back']
+        # lmm_items = ['Show Listeners', 'Kill Listener', 'Back']
+        lmm_items = ['Show Listeners', 'Kill Listener']
         lmm_back = False
         lmm = TerminalMenu(
             menu_entries=lmm_items,
@@ -86,6 +140,7 @@ class MainMenu :
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
             clear_screen=False,
+            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
         )
 
         ### Listeners List
@@ -105,6 +160,7 @@ class MainMenu :
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
             clear_screen=False,
+            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
         )
 
         ### Listener Kill Menu
@@ -119,77 +175,41 @@ class MainMenu :
             menu_highlight_style=self.h_kill_style,
             cycle_cursor=True,
             clear_screen=False,
-        )
-
-        ## Listeners menu loop [0-2] ['Show Listeners', 'Kill Listener', 'Back']
-        while not lmm_back:
-            lmm_sel = lmm.show()
-
-            if lmm_sel == 0:
-                ## Listeners list menu
-                while not lm_list_back:
-                    lm_list_sel = lm_list_menu.show()
-                    if lm_list_items[lm_list_sel] == 'Back':
-                        lm_list_back = True
-                
-                lm_list_back = False
-            
-            elif lmm_sel == 1:
-                ## kill listener menu
-                while not lm_kill_back:
-                    lm_kill_sel = lm_kill_menu.show()
-                    if lm_list_items[lm_kill_sel] == 'Back':
-                        lm_kill_back = True
-                
-                lm_kill_back = False
-            
-            elif lmm_sel == 2:
-                lmm_back = True
-
-    def main_sub(self):
-
-        ### main menu
-        mm_title = f'\n\n       Palinka C2 Main Menu\n'
-        mm_items = ['Listeners', 'Agents', 'Overview', 'Quit']
-        mm_exit = False
-
-        mm = TerminalMenu(
-            menu_entries=mm_items,
-            title=mm_title,
-            menu_cursor=self.cursor,
-            menu_cursor_style=self.cursor_style,
-            menu_highlight_style=self.h_style,
-            cycle_cursor=True,
-            clear_screen=False,
             accept_keys=('enter', 'ctrl-e', 'ctrl-w')
         )
 
-        ## main menu loop [0-3] - ['Listeners', 'Agents', 'Overview', 'Quit']
-        while not mm_exit:
-            main_sel = mm.show()
+        # lmm_sel = lmm.show()
 
-            if mm.chosen_accept_key == 'ctrl-w':
+        # Listeners menu loop [0-2] ['Show Listeners', 'Kill Listener', 'Back']
+        while not lmm_back:
+            lmm_sel = lmm.show()
+
+            if lmm.chosen_accept_key == 'ctrl-w':
                 self.on_activate_l()
-                mm_exit = True
-            elif mm.chosen_accept_key == 'ctrl-e':
-                mm_exit = True
+                lmm_back = True
+            elif lmm.chosen_accept_key == 'ctrl-e':
+                lmm_back = True
                 self.on_activate_r()
             else:
-                if main_sel == 0:
-                    ## Listeners menu loop
-                    self.listener_menu()
+                if lmm_sel == 0:
+                    ## Listeners list menu
+                    while not lm_list_back:
+                        lm_list_sel = lm_list_menu.show()
+                        if lm_list_items[lm_list_sel] == 'Back':
+                            lm_list_back = True
+                    
+                    lm_list_back = False
+                
+                elif lmm_sel == 1:
+                    ## kill listener menu
+                    while not lm_kill_back:
+                        lm_kill_sel = lm_kill_menu.show()
+                        if lm_list_items[lm_kill_sel] == 'Back':
+                            lm_kill_back = True
+                    
+                    lm_kill_back = False
+                
 
-                elif main_sel == 1:
-                    print("Agent Menu Here!")
-                    time.sleep(2)
 
-                elif main_sel == 2:
-                    print("Overview Menu Here!")
-                    time.sleep(2)
-
-                elif main_sel == 3:
-                    mm_exit = True
-                    print("\n\n       Quitting!")
-
-    def sub_init(self):
-        self.main_sub()
+    # def sub_init(self):
+    #     self.main_sub()
