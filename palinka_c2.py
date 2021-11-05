@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
 import logging
-from core.mame import *
 
 ## maybe not here???
 from collections import OrderedDict
 
 from core.stash import Stash
-from code.main_menu import 
-from core.mame import SubMenus
+from core.sub_menu import SubMenus
+from code.main_menu import MainMenu
 from core.listener import HTTP_listener
 
 from platform import python_version
