@@ -12,12 +12,19 @@ sys.path.append('/home/blu/Documents/projectz/palinka_c2')
 import os
 import time
 from core.stash import *
+from pynput import keyboard
 from simple_term_menu import TerminalMenu
 
 class SubMenus :
 
     def __init__ (self, stash):
         self.stash = stash
+        # self.main_self = other_self
+
+        self.kl = keyboard.GlobalHotKeys({
+            '<ctrl>+<right>': self.on_activate_r,
+            '<ctrl>+<left>': self.on_activate_l})
+        self.kl.start()
 
         # general styling
         self.h_style = ('bg_green', 'fg_black', 'italics')
@@ -26,6 +33,19 @@ class SubMenus :
         self.cursor_kill = '       X '
         self.cursor_style = ('fg_green', 'bold')
         self.cursor_style_kill = ('fg_red', 'bold')
+
+
+        self.index = 0
+        self.menu_entry = ['Listeners', 'Agents', 'Overview', 'Quit']
+
+    def on_activate_r(self):
+        self.index = (self.index + 1) % (len(self.menu_entry))
+        # self.print_menu()
+        print('AA')
+    def on_activate_l(self):
+        self.index = (self.index - 1) % (len(self.menu_entry))
+        # self.print_menu()
+        print('AA')
 
     def listener_menu(self):
         ### Listeners main menu
@@ -39,7 +59,7 @@ class SubMenus :
             menu_cursor_style=self.cursor_style,
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
-            clear_screen=True,
+            clear_screen=False,
         )
 
         ### Listeners List
@@ -58,7 +78,7 @@ class SubMenus :
             menu_cursor_style=self.cursor_style,
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
-            clear_screen=True,
+            clear_screen=False,
         )
 
         ### Listener Kill Menu
@@ -72,7 +92,7 @@ class SubMenus :
             menu_cursor_style=self.cursor_style_kill,
             menu_highlight_style=self.h_kill_style,
             cycle_cursor=True,
-            clear_screen=True,
+            clear_screen=False,
         )
 
         ## Listeners menu loop [0-2] ['Show Listeners', 'Kill Listener', 'Back']
@@ -114,7 +134,7 @@ class SubMenus :
             menu_cursor_style=self.cursor_style,
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
-            clear_screen=True,
+            clear_screen=False,
         )
 
         ## main menu loop [0-3] - ['Listeners', 'Agents', 'Overview', 'Quit']
@@ -135,6 +155,9 @@ class SubMenus :
 
             elif main_sel == 3:
                 mm_exit = True
+
+                self.kl.stop()
+                
                 print("\n\n       Quitting!")
 
     def menu_init(self):
