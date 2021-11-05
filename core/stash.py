@@ -5,8 +5,8 @@ from sqlite3 import Error, connect
 
 class Stash :
 
-    def __init__(self, db_name):
-        self.db_file = db_name
+    def __init__(self, db_file):
+        self.db_file = db_file
 
     def create_connection(self):
         conn = None

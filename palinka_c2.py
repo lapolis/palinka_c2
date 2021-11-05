@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
 
-#import re
-#import argparse
-#import datetime
-#import requests
-#import configparser
-#from time import sleep
-
 import logging
 from core.mame import *
 
 ## maybe not here???
 from collections import OrderedDict
 
-from core.listener import HTTP_listener
 from core.stash import Stash
+from code.main_menu import 
+from core.mame import SubMenus
+from core.listener import HTTP_listener
 
 from platform import python_version
 from os import system, path, getcwd, makedirs
@@ -40,7 +35,6 @@ from os import system, path, getcwd, makedirs
                                       
 #     ''')
 
-from core.stash import *
 def main():
     ## remove flask logs
     log = logging.getLogger('werkzeug')
@@ -60,6 +54,11 @@ def main():
     # to fix - arg for project name
     db = Stash(path.join(out_fold, 'PROJECT_NAME' + '.db'))
     db.db_init()
+
+    ### Testing menu - Switch to tabs!!
+    mm = SubMenus(db)
+    mm.menu_init()
+    exit()
 
 
     listeners = OrderedDict()
