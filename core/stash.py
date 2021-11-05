@@ -119,6 +119,19 @@ class Stash :
 
         conn.close()
 
+    def get_listeners(self):
+        conn = self.create_connection()
+        result = ''
+        try:
+            c = conn.cursor()
+            c.execute( 'SELECT list_name FROM key_store' )
+            result = c.fetchall()
+        except Error as e:
+            error(e)
+
+        conn.close()
+        return result
+
 
 
 ## command history
