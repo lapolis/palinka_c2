@@ -3,8 +3,12 @@ Why am I doing this? Cause I recently started usign CobaltStrike for red team op
 I decided to start this things after I saw this [article](https://0xrick.github.io/misc/c2/), so yeah, thanks 0xRick!
 
 ## Changelog
+### v0.2
+Added functionalities:
+- Interactive menu
+- Tabbed menu (hopefully) like d4rk3r likes xD
 ### v0.1
-Added listener functionalities:
+Added functionalities:
 - Store commands
 - Store command/output history
 - Store encryption key for each listener
