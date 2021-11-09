@@ -132,6 +132,19 @@ class Stash :
         conn.close()
         return result
 
+    def get_agents(self):
+        conn = self.create_connection()
+        result = ''
+        try:
+            c = conn.cursor()
+            c.execute( 'SELECT agent_name,hostname FROM agents' )
+            result = c.fetchall()
+        except Error as e:
+            error(e)
+
+        conn.close()
+        return result
+
 
 
 ## command history

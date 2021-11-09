@@ -55,8 +55,8 @@ class MainMenu :
         # print(f'{slot}')
         print('''
  
-  ██▓███   ▄▄▄       ██▓     ██▓ ███▄    █  ██ ▄█▀▄▄▄          ▄████▄    ██████ 
- ▓██░  ██▒▒████▄    ▓██▒    ▓██▒ ██ ▀█   █  ██▄█▒▒████▄       ▒██▀ ▀█        ██▒ 
+  ██▓███   ▄▄▄       ██▓     ██▓ ███▄    █  ██ ▄█▀▄▄▄          ▄████▄   ░██████ 
+ ▓██░  ██▒▒████▄    ▓██▒    ▓██▒ ██ ▀█   █  ██▄█▒▒████▄       ▒██▀ ▀█    ░   ██▒ 
  ▓██░ ██▓▒▒██  ▀█▄  ▒██░    ▒██▒▓██  ▀█ ██▒▓███▄░▒██  ▀█▄     ▒▓█    ▄    ▄██▓▒   
  ▒██▄█▓▒ ▒░██▄▄▄▄██ ▒██░    ░██░▓██▒  ▐▌██▒▓██ █▄░██▄▄▄▄██    ▒▓▓▄ ▄██▒ ▄█▓▒░
  ▒██▒ ░  ░ ▓█   ▓██▒░██████▒░██░▒██░   ▓██░▒██▒ █▄▓█   ▓██▒   ▒ ▓███▀ ░ ██████▒▒
@@ -78,8 +78,7 @@ class MainMenu :
         if menu_to_show == 'Listeners':
             self.listener_menu()
         elif menu_to_show == 'Agents':
-            print('Agent Menu HERE!!')
-            self.listener_menu()
+            self.agents_menu()
         elif menu_to_show == 'Overview':
             print('Overview Menu HERE!!')
             self.listener_menu()
@@ -124,6 +123,88 @@ class MainMenu :
                     qm_back = True
 
 
+    def agents_menu(self):
+        ### Agents main menu
+        amm_title = '\n\n       Agents Menu\n'
+        # amm_items = ['Show Agents', 'Kill Agent', 'Back']
+        amm_items = ['Show Agents', 'Kill Agent']
+        amm_back = False
+        amm = TerminalMenu(
+            menu_entries=amm_items,
+            title=amm_title,
+            menu_cursor=self.cursor,
+            menu_cursor_style=self.cursor_style,
+            menu_highlight_style=self.h_style,
+            cycle_cursor=True,
+            clear_screen=False,
+            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+        )
+
+        ### Agents List
+        am_list_title = '\n\n       Available Agets\n'
+        agents = self.stash.get_agents()
+        if agents:
+            am_list_items = [f'{a[0]} @ {a[1]}' for a in agents]
+            am_list_items.append('Back')
+        else:
+            am_list_items = ['NO ACTIVE AGENTS, you n00b', 'Back']
+        am_list_back = False
+        am_list_menu = TerminalMenu(
+            menu_entries=am_list_items,
+            title=am_list_title,
+            menu_cursor=self.cursor,
+            menu_cursor_style=self.cursor_style,
+            menu_highlight_style=self.h_style,
+            cycle_cursor=True,
+            clear_screen=False,
+            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+        )
+
+        ### Listener Kill Menu
+        ### use same items fo prev menu
+        am_kill_title = '\n\n       Agents Killer\n'
+        am_kill_back = False
+        am_kill_menu = TerminalMenu(
+            menu_entries=am_list_items,
+            title=am_kill_title,
+            menu_cursor=self.cursor_kill,
+            menu_cursor_style=self.cursor_style_kill,
+            menu_highlight_style=self.h_kill_style,
+            cycle_cursor=True,
+            clear_screen=False,
+            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+        )
+
+        # amm_sel = amm.show()
+
+        # agents menu loop [0-2] ['Show agents', 'Kill Listener', 'Back']
+        while not amm_back:
+            amm_sel = amm.show()
+
+            if amm.chosen_accept_key == 'ctrl-w':
+                self.on_activate_l()
+                amm_back = True
+            elif amm.chosen_accept_key == 'ctrl-e':
+                amm_back = True
+                self.on_activate_r()
+            else:
+                if amm_sel == 0:
+                    ## agents list menu
+                    while not am_list_back:
+                        am_list_sel = am_list_menu.show()
+                        if am_list_items[am_list_sel] == 'Back':
+                            am_list_back = True
+                    
+                    am_list_back = False
+                
+                elif amm_sel == 1:
+                    ## kill listener menu
+                    while not am_kill_back:
+                        am_kill_sel = am_kill_menu.show()
+                        if am_list_items[am_kill_sel] == 'Back':
+                            am_kill_back = True
+                    
+                    am_kill_back = False
 
 
     def listener_menu(self):
