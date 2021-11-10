@@ -6,7 +6,6 @@ import logging
 from collections import OrderedDict
 
 from core.stash import Stash
-from core.sub_menu import SubMenus
 from core.main_menu import MainMenu
 from core.listener import HTTP_listener
 
@@ -55,8 +54,6 @@ def main():
     db.db_init()
 
     ### Testing menu - Switch to tabs!!
-    # mm = SubMenus(db)
-    # mm.menu_init()
     mm = MainMenu(db)
     mm.menu_init()
     exit()

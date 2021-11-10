@@ -145,6 +145,19 @@ class Stash :
         conn.close()
         return result
 
+    def get_agents_comm_list(self, agent):
+        conn = self.create_connection()
+        result = ''
+        try:
+            c = conn.cursor()
+            c.execute( 'SELECT command,output FROM commands_history WHERE agent_name = ?' , ( agent, ) )
+            result = c.fetchall()
+        except Error as e:
+            error(e)
+
+        conn.close()
+        return result
+
 
 
 ## command history

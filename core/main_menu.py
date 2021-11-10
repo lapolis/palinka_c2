@@ -4,20 +4,13 @@
 # if not terminal_menu.chosen_accept_key:
 #   exit()
 
-### temp import
-import sys
-sys.path.append('/home/blu/Documents/projectz/palinka_c2')
-## delete!!
-
 import os
 import time
+import readline
 from core.stash import *
-# from pynput import keyboard
 from simple_term_menu import TerminalMenu
 
-# from pynput import keyboard
 from os import popen, system
-# from core.sub_menu import SubMenus
 from colorama import Fore, Back, Style
 
 class MainMenu :
@@ -35,6 +28,15 @@ class MainMenu :
         self.index = 0
         self.menu_entry = ['Listeners', 'Agents', 'Overview', 'Quit']
 
+        self.CMD = ['foo1', 'foo2', 'bar1', 'bar2', 'back']
+
+    def completer(self, text, state):
+        options = [cmd for cmd in self.CMD if cmd.startswith(text)]
+        if state < len(options):
+            return options[state]
+        else :
+            return None
+
     def on_activate_r(self):
         self.index = (self.index + 1) % (len(self.menu_entry))
         self.print_menu()
@@ -44,7 +46,7 @@ class MainMenu :
 
     def print_menu(self):
         system('clear')
-        rows, columns = popen('stty size', 'r').read().split()
+        rows, columns = popen('/usr/bin/stty size', 'r').read().split()
         # print(f'Rows {rows}')
         # print(f'Columns {columns}')
 
@@ -83,7 +85,6 @@ class MainMenu :
             print('Overview Menu HERE!!')
             self.listener_menu()
         elif menu_to_show == 'Quit':
-            print('Quit Menu HERE!!')
             self.quit_menu()
         # self.sub_init()
 
@@ -141,7 +142,7 @@ class MainMenu :
         )
 
         ### Agents List
-        am_list_title = '\n\n       Available Agets\n'
+        am_list_title = '\n\n       Select Aget to Interact\n'
         agents = self.stash.get_agents()
         if agents:
             am_list_items = [f'{a[0]} @ {a[1]}' for a in agents]
@@ -157,7 +158,9 @@ class MainMenu :
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
             clear_screen=False,
-            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+            accept_keys=('enter', 'ctrl-e', 'ctrl-w'),
+            preview_command=self.short_com_hist,
+            preview_size=0.85
         )
 
         ### Listener Kill Menu
@@ -177,13 +180,13 @@ class MainMenu :
 
         # amm_sel = amm.show()
 
-        # agents menu loop [0-2] ['Show agents', 'Kill Listener', 'Back']
+        # agents menu loop [0-2] ['Show agents', 'Kill Agents', 'Back']
         while not amm_back:
             amm_sel = amm.show()
 
             if amm.chosen_accept_key == 'ctrl-w':
-                self.on_activate_l()
                 amm_back = True
+                self.on_activate_l()
             elif amm.chosen_accept_key == 'ctrl-e':
                 amm_back = True
                 self.on_activate_r()
@@ -192,8 +195,24 @@ class MainMenu :
                     ## agents list menu
                     while not am_list_back:
                         am_list_sel = am_list_menu.show()
-                        if am_list_items[am_list_sel] == 'Back':
+
+                        if am_list_menu.chosen_accept_key == 'ctrl-w':
                             am_list_back = True
+                            amm_back = True
+                            self.on_activate_l()
+                        elif am_list_menu.chosen_accept_key == 'ctrl-e':
+                            am_list_back = True
+                            amm_back = True
+                            self.on_activate_r()
+                        else:
+                            if am_list_items[am_list_sel] in ['Back', 'NO ACTIVE AGENTS, you n00b']:
+                                am_list_back = True
+                            else:
+                                ############################################### aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                                task_input = self.get_task_input(am_list_items[am_list_sel])
+                                am_list_back = True
+                                amm_back = True
+                                self.print_menu()
                     
                     am_list_back = False
                 
@@ -201,10 +220,33 @@ class MainMenu :
                     ## kill listener menu
                     while not am_kill_back:
                         am_kill_sel = am_kill_menu.show()
-                        if am_list_items[am_kill_sel] == 'Back':
+                        if am_list_items[am_kill_sel] in ['Back', 'NO ACTIVE AGENTS, you n00b']:
                             am_kill_back = True
                     
                     am_kill_back = False
+
+    def get_task_input(self, agent):
+        readline.parse_and_bind("tab: complete")
+        readline.set_completer(self.completer)
+        header = f'\n\n       Set Task to {agent}. Tab is your friend.'
+        cmd = ''
+        while cmd == '' or cmd.split()[0] not in self.CMD:
+            cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
+
+    def short_com_hist(self, agent):
+        high_comm = f'{Fore.GREEN}{Style.BRIGHT} Task > {Fore.WHITE}'
+        high_resp = f'{Fore.CYAN} Result > '
+        comms = self.stash.get_agents_comm_list(agent.split()[0])
+        ret = ''
+        for c in comms:
+            cra = c[1].replace('\r','').split('\n')
+            cr = cra[0]
+            if len(cra) > 1:
+                # cr = ''.join([f'{" "*11}{Fore.CYAN}{cc}\n' for cc in cra])
+                for i in range(1,len(cra)):
+                    cr += f'{" "*10}{Fore.CYAN}{cra[i]}\n'
+            ret += f'{high_comm}{c[0]}\n{high_resp}{cr}{Style.RESET_ALL}'
+        return ret
 
 
     def listener_menu(self):
@@ -266,8 +308,8 @@ class MainMenu :
             lmm_sel = lmm.show()
 
             if lmm.chosen_accept_key == 'ctrl-w':
-                self.on_activate_l()
                 lmm_back = True
+                self.on_activate_l()
             elif lmm.chosen_accept_key == 'ctrl-e':
                 lmm_back = True
                 self.on_activate_r()
@@ -276,7 +318,7 @@ class MainMenu :
                     ## Listeners list menu
                     while not lm_list_back:
                         lm_list_sel = lm_list_menu.show()
-                        if lm_list_items[lm_list_sel] == 'Back':
+                        if lm_list_items[lm_list_sel] in ['NO ACTIVE LISTENERS', 'Back']:
                             lm_list_back = True
                     
                     lm_list_back = False
@@ -285,7 +327,7 @@ class MainMenu :
                     ## kill listener menu
                     while not lm_kill_back:
                         lm_kill_sel = lm_kill_menu.show()
-                        if lm_list_items[lm_kill_sel] == 'Back':
+                        if lm_list_items[lm_kill_sel] in ['NO ACTIVE LISTENERS', 'Back']:
                             lm_kill_back = True
                     
                     lm_kill_back = False
