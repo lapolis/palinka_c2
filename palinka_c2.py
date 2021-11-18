@@ -38,7 +38,7 @@ def main():
     log = logging.getLogger('werkzeug')
     # to fix (disable ALL logs)
     # log.setLevel(logging.ERROR)
-    log.disabled = False
+    log.disabled = True
 
     ## create folders
     cwd = getcwd()
@@ -50,24 +50,25 @@ def main():
         makedirs(dow_fold)
 
     # to fix - arg for project name
-    db = Stash(path.join(out_fold, 'PROJECT_NAME' + '.db'))
+    db = Stash(path.join(out_fold, 'PROJECT_NAME_0.1' + '.db'))
     db.db_init()
 
-    ### Testing menu - Switch to tabs!!
-    mm = MainMenu(db)
-    mm.menu_init()
-    exit()
 
 
     listeners = OrderedDict()
     # listeners[name] = Listener(name, port, ipaddress)
     # listeners[name].start()
 
-    listeners['list_one'] = HTTP_listener('main_listener_lol', '192.168.0.28', 9090, db)
-    listeners['list_one'].start()
+    listeners['first_listener'] = HTTP_listener('first_listener', '192.168.0.28', 9090, db)
+    listeners['first_listener'].start()
 
-    input('stop one')
-    listeners['list_one'].stop()
+    ### Testing menu - Switch to tabs!!
+    mm = MainMenu(db)
+    mm.menu_init()
+    
+
+    listeners['first_listener'].stop()
+    exit(0)
 
 if __name__ == '__main__':
     main()

@@ -8,6 +8,8 @@ import os
 import time
 import readline
 from core.stash import *
+from random import choice
+from string import ascii_letters
 from simple_term_menu import TerminalMenu
 
 from os import popen, system
@@ -28,7 +30,7 @@ class MainMenu :
         self.index = 0
         self.menu_entry = ['Listeners', 'Agents', 'Overview', 'Quit']
 
-        self.CMD = ['foo1', 'foo2', 'bar1', 'bar2', 'back']
+        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'back_to_previous_menu']
 
     def completer(self, text, state):
         options = [cmd for cmd in self.CMD if cmd.startswith(text)]
@@ -123,6 +125,15 @@ class MainMenu :
                     system('clear')
                     qm_back = True
 
+    def agent_list_gen(self):
+        ### Agents List
+        agents = self.stash.get_agents()
+        if agents:
+            agent_list = [f'{a[0]} @ {a[1]}' for a in agents]
+            agent_list.append('Back')
+        else:
+            agent_list = ['NO ACTIVE AGENTS, you n00b', 'Back']
+        return agent_list
 
     def agents_menu(self):
         ### Agents main menu
@@ -141,14 +152,8 @@ class MainMenu :
             accept_keys=('enter', 'ctrl-e', 'ctrl-w')
         )
 
-        ### Agents List
         am_list_title = '\n\n       Select Aget to Interact\n'
-        agents = self.stash.get_agents()
-        if agents:
-            am_list_items = [f'{a[0]} @ {a[1]}' for a in agents]
-            am_list_items.append('Back')
-        else:
-            am_list_items = ['NO ACTIVE AGENTS, you n00b', 'Back']
+        am_list_items = self.agent_list_gen()
         am_list_back = False
         am_list_menu = TerminalMenu(
             menu_entries=am_list_items,
@@ -160,7 +165,8 @@ class MainMenu :
             clear_screen=False,
             accept_keys=('enter', 'ctrl-e', 'ctrl-w'),
             preview_command=self.short_com_hist,
-            preview_size=0.85
+            preview_size=0.85,
+            preview_title=f'{Style.BRIGHT}Short Commands History{Style.RESET_ALL}'
         )
 
         ### Listener Kill Menu
@@ -191,6 +197,9 @@ class MainMenu :
                 amm_back = True
                 self.on_activate_r()
             else:
+
+                # am_list_menu.menu_entries = self.agent_list_gen()
+                
                 if amm_sel == 0:
                     ## agents list menu
                     while not am_list_back:
@@ -205,14 +214,12 @@ class MainMenu :
                             amm_back = True
                             self.on_activate_r()
                         else:
-                            if am_list_items[am_list_sel] in ['Back', 'NO ACTIVE AGENTS, you n00b']:
-                                am_list_back = True
-                            else:
-                                ############################################### aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-                                task_input = self.get_task_input(am_list_items[am_list_sel])
-                                am_list_back = True
-                                amm_back = True
-                                self.print_menu()
+                            if am_list_items[am_list_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
+                                task_input = self.get_task_input(am_list_items[am_list_sel].split()[0])
+                                
+                            am_list_back = True
+                            amm_back = True
+                            self.print_menu()
                     
                     am_list_back = False
                 
@@ -220,9 +227,26 @@ class MainMenu :
                     ## kill listener menu
                     while not am_kill_back:
                         am_kill_sel = am_kill_menu.show()
-                        if am_list_items[am_kill_sel] in ['Back', 'NO ACTIVE AGENTS, you n00b']:
+
+                        if am_kill_menu.chosen_accept_key == 'ctrl-w':
                             am_kill_back = True
-                    
+                            amm_back = True
+                            self.on_activate_l()
+                        elif am_kill_menu.chosen_accept_key == 'ctrl-e':
+                            am_kill_back = True
+                            amm_back = True
+                            self.on_activate_r()
+                        else:
+                            if am_list_items[am_kill_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
+                                agent = am_list_items[am_kill_sel].split()[0]
+                                command_code = self.gen_command_code()
+                                cmd = 'quit'
+                                self.stash.set_agent_job(command_code, agent, cmd)
+
+                            am_kill_back = True
+                            amm_back = True
+                            self.print_menu()
+
                     am_kill_back = False
 
     def get_task_input(self, agent):
@@ -232,12 +256,25 @@ class MainMenu :
         cmd = ''
         while cmd == '' or cmd.split()[0] not in self.CMD:
             cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
+        command_code = self.gen_command_code()
+        self.stash.set_agent_job(command_code, agent, cmd)
+
+    def gen_command_code(self):
+        command_code = ''.join(choice(ascii_letters) for i in range(10))
+        comms = self.stash.get_command_codes()
+        if comms:
+            comms_list = [c[0] for c in comms]
+        else:
+            comms_list = []
+        while command_code in comms_list:
+            command_code = ''.join(choice(ascii_letters) for i in range(10))
+        return command_code
 
     def short_com_hist(self, agent):
         high_comm = f'{Fore.GREEN}{Style.BRIGHT} Task > {Fore.WHITE}'
         high_resp = f'{Fore.CYAN} Result > '
         comms = self.stash.get_agents_comm_list(agent.split()[0])
-        ret = ''
+        ret = '\n'
         for c in comms:
             cra = c[1].replace('\r','').split('\n')
             cr = cra[0]
@@ -245,7 +282,7 @@ class MainMenu :
                 # cr = ''.join([f'{" "*11}{Fore.CYAN}{cc}\n' for cc in cra])
                 for i in range(1,len(cra)):
                     cr += f'{" "*10}{Fore.CYAN}{cra[i]}\n'
-            ret += f'{high_comm}{c[0]}\n{high_resp}{cr}{Style.RESET_ALL}'
+            ret += f'{high_comm}{c[0]}\n{high_resp}{cr}{Style.RESET_ALL}\n'
         return ret
 
 

