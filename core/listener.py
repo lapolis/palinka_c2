@@ -78,14 +78,14 @@ class HTTP_listener:
                 result = DECRYPT(enc_result, self.key)
                 # success(f'Beacon name: {name} - Results to task {code} -> {result}')
                 # self.stash.sql_stash( '''INSERT INTO commands_history(output) VALUES( ? ) WHERE command_code = ? ;''', (result, code) )
-                self.stash.sql_stash( '''UPDATE commands_history SET output = ? WHERE command_code = ? ;''', (result, code) )
+                self.stash.sql_stash( 'UPDATE commands_history SET output = ? WHERE command_code = ? ; ', (result, code) )
                 if 'VALID agent renamed to ' in result:
                     agent_name = result.split()[-1]
                     old_name = self.stash.get_agent_from_comm(code)
-                    self.stash.sql_stash( '''UPDATE agents SET agent_name = ? WHERE agent_name = ? ;''', (agent_name, old_name) )
-                elif 'VALID agent dead' in result:
-                    agent_name = result.split()[-1]
-                    self.stash.sql_stash( '''UPDATE agents SET alive = ? WHERE agent_name = ? ;''', (False, agent_name) )
+                    self.stash.sql_stash( 'UPDATE agents SET agent_name = ? WHERE agent_name = ? ; ', (agent_name, old_name) )
+                # elif 'VALID agent dead' in result:
+                #     agent_name = result.split()[-1]
+                #     self.stash.sql_stash( '''UPDATE agents SET alive = ? WHERE agent_name = ? ;''', (False, agent_name) )
                 return ('', 204)
             else:
                 error(f'Command Code {code} not found!')

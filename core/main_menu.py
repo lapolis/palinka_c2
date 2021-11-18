@@ -242,6 +242,7 @@ class MainMenu :
                                 command_code = self.gen_command_code()
                                 cmd = 'quit'
                                 self.stash.set_agent_job(command_code, agent, cmd)
+                                self.stash.sql_stash( 'UPDATE agents SET alive = ? WHERE agent_name = ? ;', (False, agent) )
 
                             am_kill_back = True
                             amm_back = True
