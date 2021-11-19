@@ -198,10 +198,11 @@ class MainMenu :
                 self.on_activate_r()
             else:
 
-                # am_list_menu.menu_entries = self.agent_list_gen()
                 
                 if amm_sel == 0:
                     ## agents list menu
+                    # find a way to regenerate agent list
+                    # am_list_menu.menu_entries = self.agent_list_gen()
                     while not am_list_back:
                         am_list_sel = am_list_menu.show()
 

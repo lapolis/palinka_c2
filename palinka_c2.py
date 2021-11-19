@@ -35,10 +35,11 @@ from os import system, path, getcwd, makedirs
 
 def main():
     ## remove flask logs
+    logging.basicConfig(filename='debug.log',level=logging.DEBUG)
     log = logging.getLogger('werkzeug')
     # to fix (disable ALL logs)
     # log.setLevel(logging.ERROR)
-    log.disabled = True
+    log.disabled = False
 
     ## create folders
     cwd = getcwd()

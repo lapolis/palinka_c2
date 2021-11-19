@@ -111,9 +111,13 @@ class Stash :
         #     error(e)
 
         # conn.close()
-
-        result = self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands WHERE command_code = ?)' , ( com_code, ) )[0][0]
-        result.append( 'SELECT EXISTS(SELECT 1 FROM commands_history WHERE command_code = ?)' , ( com_code, )[0][0] )
+        try:
+            result = [ self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands WHERE command_code = ?)' , ( com_code, ) )[0][0] ]
+            result.append( self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands_history WHERE command_code = ?)' , ( com_code, ) )[0][0] )
+        except Exception as e:
+            error(e)
+            result = [0]
+            
         return sum(result)
 
     def get_key(self, listener):
