@@ -292,7 +292,7 @@ class MainMenu :
         ### Listeners main menu
         lmm_title = '\n\n       Listeners Menu\n'
         # lmm_items = ['Show Listeners', 'Kill Listener', 'Back']
-        lmm_items = ['Show Listeners', 'Kill Listener']
+        lmm_items = ['Show Listeners', 'New Listener', 'Kill Listener']
         lmm_back = False
         lmm = TerminalMenu(
             menu_entries=lmm_items,
@@ -357,17 +357,48 @@ class MainMenu :
                     ## Listeners list menu
                     while not lm_list_back:
                         lm_list_sel = lm_list_menu.show()
-                        if lm_list_items[lm_list_sel] in ['NO ACTIVE LISTENERS', 'Back']:
+
+                        if lm_list_menu.chosen_accept_key == 'ctrl-w':
                             lm_list_back = True
+                            lmm_back = True
+                            self.on_activate_l()
+                        elif lm_list_menu.chosen_accept_key == 'ctrl-e':
+                            lm_list_back = True
+                            lmm_back = True
+                            self.on_activate_r()
+                        else:
+                            if lm_list_items[lm_list_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
+                                print('do stuff here, probably print all the agents connected')
+                            
+                            lm_list_back = True
+                            lmm_back = True
+                            self.print_menu()
                     
                     lm_list_back = False
-                
+
                 elif lmm_sel == 1:
+                    cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
+                
+                elif lmm_sel == 2:
                     ## kill listener menu
                     while not lm_kill_back:
                         lm_kill_sel = lm_kill_menu.show()
-                        if lm_list_items[lm_kill_sel] in ['NO ACTIVE LISTENERS', 'Back']:
+
+                        if lm_kill_menu.chosen_accept_key == 'ctrl-w':
                             lm_kill_back = True
+                            lmm_back = True
+                            self.on_activate_l()
+                        elif lm_kill_menu.chosen_accept_key == 'ctrl-e':
+                            lm_kill_back = True
+                            lmm_back = True
+                            self.on_activate_r()
+                        else:
+                            if lm_list_items[lm_kill_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
+                                print('kill stuff here!!')
+
+                            lm_kill_back = True
+                            lmm_back = True
+                            self.print_menu()
                     
                     lm_kill_back = False
                 

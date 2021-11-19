@@ -105,7 +105,7 @@ class HTTP_listener:
 
     def run(self):
         # to fix (debug False and logger True)
-        self.app.logger.disabled = False
+        self.app.logger.disabled = True
         self.app.run(port=self.port, host=self.ip, debug=False)
 
     def start(self):
