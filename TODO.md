@@ -1,5 +1,5 @@
 ## The usual ToDo file that only the 0.5%* of people really care about
-__(*)I ma not part of that 0.5% - This stuff might never be done__
+__(*)I am not part of that 0.5% - This stuff might never be done__
 
 The list:
 - Parse HTTPS endpoints from config file
