@@ -4,6 +4,7 @@ __(*)I am not part of that 0.5% - This stuff might never be done__
 The list:
 - Parse HTTPS endpoints from config file
 - Auto-Generate (at least) powershell code
+- PornHub c2 w/ postcard call back
 - <del>Tabbed main menu</del>
 - <del>different menu</del>
 - pwn stuff
