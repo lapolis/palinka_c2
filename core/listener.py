@@ -26,11 +26,9 @@ class HTTP_listener:
             self.key = key[0][0]
         else:
             self.key = key_init()
-            self.stash.sql_stash( '''INSERT INTO key_store(enc_key, list_name) VALUES( ?, ? )''', (self.key, name) )
+            # self.stash.sql_stash( '''INSERT INTO key_store(enc_key, list_name, list_type, alive) VALUES( ?, ?, ?, ? )''', (self.key, name, 'HTTPS', 'True') )
+            self.stash.register_list(name, 'HTTPS', self.key)
 
-        print(self.key)
-
-        ## to fix - get auto folder you idiot
         html_fold = path.join(getcwd(), 'core' ,'html')
         self.app = Flask(__name__, template_folder=html_fold)
 

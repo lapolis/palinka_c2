@@ -80,7 +80,8 @@ class Stash :
         self.sql_stash(""" CREATE TABLE IF NOT EXISTS key_store (
             enc_key TEXT, \
             list_name TEXT PRIMARY KEY, \
-            list_type TEXT ); """)
+            list_type TEXT, \
+            alive BOOLEAN ); """)
 
     def get_task(self, agent):
         # conn = self.create_connection()
@@ -180,7 +181,7 @@ class Stash :
 
         # conn.close()
 
-        query = 'SELECT list_name FROM key_store ;'
+        query = 'SELECT list_name,list_type FROM key_store WHERE alive = True ;'
         result = self.sql_get_stash( query )
         return result
 
@@ -224,6 +225,11 @@ class Stash :
     def get_command_codes(self):
         query = 'SELECT command_code FROM commands_history ;'
         return self.sql_get_stash( query )
+
+    def register_list(self, name, l_type, key):
+        query = 'INSERT INTO key_store(enc_key, list_name, list_type, alive) VALUES( ?, ?, ?, ? )'
+        args = (key, name, l_type, True)
+        self.sql_stash( query, args )
 
 
 

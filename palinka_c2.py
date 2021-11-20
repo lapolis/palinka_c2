@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 from core.stash import Stash
 from core.main_menu import MainMenu
-from core.listener import HTTP_listener
+
 
 from platform import python_version
 from os import system, path, getcwd, makedirs
@@ -51,7 +51,7 @@ def main():
         makedirs(dow_fold)
 
     # to fix - arg for project name
-    db = Stash(path.join(out_fold, 'PROJECT_NAME_0.1' + '.db'))
+    db = Stash(path.join(out_fold, 'PROJECT_NAME_0.2' + '.db'))
     db.db_init()
 
     ### Testing menu - Switch to tabs!!

@@ -5,17 +5,18 @@ from colorama import Fore, Back, Style
 #     msg = 
 
 def error(msg):
-    msg = f'XX {datetime.now().strftime("%H:%M:%S")} --> {msg}'
+    msg = f'\n\n       XX {datetime.now().strftime("%H:%M:%S")} --> {msg}'
     print( Fore.RED + msg + Style.RESET_ALL + Fore.RESET )
+    input(f'       Enter to continue.')
 
 def info(msg):
-    msg = f'OO {datetime.now().strftime("%H:%M:%S")} --> {msg}'
+    msg = f'\n\n       OO {datetime.now().strftime("%H:%M:%S")} --> {msg}'
     print( Fore.BLUE + Style.DIM + msg + Style.RESET_ALL + Fore.RESET )
 
 def warning(msg):
-    msg = f'## {datetime.now().strftime("%H:%M:%S")} --> {msg}'
+    msg = f'\n\n       ## {datetime.now().strftime("%H:%M:%S")} --> {msg}'
     print( Fore.YELLOW + msg + Style.RESET_ALL + Fore.RESET )
 
 def success(msg):
-    msg = f'++ {datetime.now().strftime("%H:%M:%S")} --> {msg}'
+    msg = f'\n\n       ++ {datetime.now().strftime("%H:%M:%S")} --> {msg}'
     print( Fore.GREEN + Style.BRIGHT + msg + Style.RESET_ALL + Fore.RESET )

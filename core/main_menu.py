@@ -4,17 +4,19 @@
 # if not terminal_menu.chosen_accept_key:
 #   exit()
 
-import os
-import time
 import readline
-from core.stash import *
+from time import time
 from random import choice
 from string import ascii_letters
+from ipaddress import ip_address
 from collections import OrderedDict
 from simple_term_menu import TerminalMenu
 
 from os import popen, system
 from colorama import Fore, Back, Style
+
+from core.stash import *
+from core.listener import HTTP_listener
 
 class MainMenu :
     def __init__(self, stash):
@@ -33,11 +35,19 @@ class MainMenu :
 
         self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'back_to_previous_menu']
 
-        self.listener_types = ['HTTPS']
+        self.listener_types = ['HTTPS', 'back']
         self.listeners = OrderedDict()
 
-    def completer(self, text, state):
+    ### find a way to use only one function (text and state non existing error)
+    def cmd_completer(self, text, state):
         options = [cmd for cmd in self.CMD if cmd.startswith(text)]
+        if state < len(options):
+            return options[state]
+        else :
+            return None
+
+    def listener_completer(self, text, state):
+        options = [cmd for cmd in self.listener_types if cmd.startswith(text)]
         if state < len(options):
             return options[state]
         else :
@@ -52,7 +62,7 @@ class MainMenu :
 
     def print_menu(self):
         system('clear')
-        rows, columns = popen('/usr/bin/stty size', 'r').read().split()
+        rows, columns = popen('/usr/bin/stty size', 'r').read().split(' ')
         # print(f'Rows {rows}')
         # print(f'Columns {columns}')
 
@@ -220,7 +230,7 @@ class MainMenu :
                             self.on_activate_r()
                         else:
                             if am_list_items[am_list_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
-                                task_input = self.get_task_input(am_list_items[am_list_sel].split()[0])
+                                task_input = self.get_task_input(am_list_items[am_list_sel].split(' ')[0])
                                 
                             am_list_back = True
                             amm_back = True
@@ -243,7 +253,7 @@ class MainMenu :
                             self.on_activate_r()
                         else:
                             if am_list_items[am_kill_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
-                                agent = am_list_items[am_kill_sel].split()[0]
+                                agent = am_list_items[am_kill_sel].split(' ')[0]
                                 command_code = self.gen_command_code()
                                 cmd = 'quit'
                                 self.stash.set_agent_job(command_code, agent, cmd)
@@ -257,10 +267,10 @@ class MainMenu :
 
     def get_task_input(self, agent):
         readline.parse_and_bind("tab: complete")
-        readline.set_completer(self.completer)
+        readline.set_completer(self.cmd_completer)
         header = f'\n\n       Set Task to {agent}. Tab is your friend.'
         cmd = ''
-        while cmd == '' or cmd.split()[0] not in self.CMD:
+        while cmd == '' or cmd.split(' ')[0] not in self.CMD:
             cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
         command_code = self.gen_command_code()
         self.stash.set_agent_job(command_code, agent, cmd)
@@ -279,7 +289,7 @@ class MainMenu :
     def short_com_hist(self, agent):
         high_comm = f'{Fore.GREEN}{Style.BRIGHT} Task > {Fore.WHITE}'
         high_resp = f'{Fore.CYAN} Result > '
-        comms = self.stash.get_agents_comm_list(agent.split()[0])
+        comms = self.stash.get_agents_comm_list(agent.split(' ')[0])
         ret = '\n'
         for c in comms:
             cra = c[1].replace('\r','').split('\n')
@@ -313,7 +323,7 @@ class MainMenu :
         lm_list_title = '\n\n       Available Listeners\n'
         listeners = self.stash.get_listeners()
         if listeners:
-            lm_list_items = [l[0] for l in listeners]
+            lm_list_items = [f'{l[1]} listener - name: {l[0]}' for l in listeners]
             lm_list_items.append('Back')
         else:
             lm_list_items = ['NO ACTIVE LISTENERS', 'Back']
@@ -382,12 +392,16 @@ class MainMenu :
 
                 elif lmm_sel == 1:
                     ## start listener menu
-                    already_running = 1
-                    while already_running:
-                        header = 'Start a new listener, Tab is your friend. <Listener Type> <Args>. Which args? RTFM'
-                        cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
-                        self.start_listener(cmd)
+                    # readline.parse_and_bind("tab: complete")
+                    # readline.set_completer(self.listener_completer)
+                    # already_running = 1
+                    # while already_running:
+                    #     header = f'\n\n       Start a new listener, Tab is your friend. "back" to go back. <Listener Type> <Args>. Which args? RTFM'
+                    #     cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
+                    #     already_running = self.start_listener(cmd)
+                    self.start_listener()
                     lmm_back = True
+                    self.print_menu()
 
                 
                 elif lmm_sel == 2:
@@ -414,18 +428,70 @@ class MainMenu :
                     lm_kill_back = False
 
 
-    def start_listener(self, cmd):
+    def start_listener(self):
 
         # listeners[name] = Listener(name, port, ipaddress)
         # listeners[name].start()
+        # f'\n\n       '
 
-        if cmd.split()[0] == 'HTTPS':
-            self.listeners[l_name] = HTTP_listener(l_name, '192.168.0.28', 9090, self.stash)
-        self.listeners[l_name].start()
+        readline.parse_and_bind("tab: complete")
+        readline.set_completer(self.listener_completer)
+        already_running = 1
+        while already_running:
+            header = f'\n\n       Start a new listener, Tab is your friend. "back" to go back. <Listener Type> <Args>. Which args? RTFM'
+            cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
+
+            if cmd == '':
+                continue
+
+            exp_cmd = cmd.split(' ')
+            if exp_cmd[0] == 'back':
+                already_running = 0
+                continue
+
+            elif exp_cmd[0] == 'HTTPS':
+                if len(exp_cmd) != 4:
+                    error(f'HTTPS <listener name> <IP> <PORT>')
+                    already_running = 0
+                    continue
+                else:
+                    garbagio,l_name,ip,port = exp_cmd
+
+                    if l_name == 'ALL':
+                        error(f'Nice try fucker!')
+                        already_running = 0
+                        continue
+
+                    try:
+                        ip_address(ip)
+                    except:
+                        error(f'Not an IP address')
+                        already_running = 0
+                        continue
+
+                    try:
+                        if 0 < int(port) < 65536:
+                            pass
+                        else:
+                            raise Exception('WTF')
+                    except:
+                        error(f'WTF is that port??')
+                        already_running = 0
+                        continue
+
+                    self.listeners[l_name] = HTTP_listener(l_name, ip, int(port), self.stash)
+
+            already_running = 0
+            self.listeners[l_name].start()
+
 
     def kill_listener(self, l_name):
         #### maybe need to add listener type
-        self.listeners[l_name].stop()
+        if l_name == 'ALL':
+            for ll in self.listeners:
+                self.listeners[ll].stop()
+        else:
+            self.listeners[l_name].stop()
                 
 
 
