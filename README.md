@@ -1,7 +1,6 @@
 # palinka_c2 v0.2
-Why am I doing this? Cause I recently started usign CobaltStrike for red team operations but I still define as "magic" most of the things that it does.  
-So, this is my way to understand things through blood and pain.  
-I decided to start this things after I saw this [article](https://0xrick.github.io/misc/c2/), so yeah, thanks 0xRick!  
+Why am I doing this? Cause I recently started usign CobaltStrike for red team operations but I still define as "magic" most of the things that it does. So, this is my way to understand things through blood and pain.  
+I decided to start this things after I saw this [article](https://0xrick.github.io/misc/c2/), so yeah, thanks 0xRick! Also thanks for the crypto function! 
 
 # Setup
 ### Getting certs ready (for HTTPS listener)

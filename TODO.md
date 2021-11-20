@@ -2,6 +2,8 @@
 __(*)I ma not part of that 0.5% - This stuff might never be done__
 
 The list:
-- Tabbed main menu
+- Parse HTTPS endpoints from config file
+- Auto-Generate (at least) powershell code
+- <del>Tabbed main menu</del>
+- <del>different menu</del>
 - pwn stuff
-- different menu
