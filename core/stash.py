@@ -79,7 +79,8 @@ class Stash :
 
         self.sql_stash(""" CREATE TABLE IF NOT EXISTS key_store (
             enc_key TEXT, \
-            list_name TEXT PRIMARY KEY ); """)
+            list_name TEXT PRIMARY KEY, \
+            list_type TEXT ); """)
 
     def get_task(self, agent):
         # conn = self.create_connection()

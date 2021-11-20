@@ -2,6 +2,7 @@
 push_master.sh
 stash/
 *.db
+*.pem
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

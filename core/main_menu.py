@@ -10,6 +10,7 @@ import readline
 from core.stash import *
 from random import choice
 from string import ascii_letters
+from collections import OrderedDict
 from simple_term_menu import TerminalMenu
 
 from os import popen, system
@@ -31,6 +32,9 @@ class MainMenu :
         self.menu_entry = ['Listeners', 'Agents', 'Overview', 'Quit']
 
         self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'back_to_previous_menu']
+
+        self.listener_types = ['HTTPS']
+        self.listeners = OrderedDict()
 
     def completer(self, text, state):
         options = [cmd for cmd in self.CMD if cmd.startswith(text)]
@@ -377,7 +381,14 @@ class MainMenu :
                     lm_list_back = False
 
                 elif lmm_sel == 1:
-                    cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
+                    ## start listener menu
+                    already_running = 1
+                    while already_running:
+                        header = 'Start a new listener, Tab is your friend. <Listener Type> <Args>. Which args? RTFM'
+                        cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
+                        self.start_listener(cmd)
+                    lmm_back = True
+
                 
                 elif lmm_sel == 2:
                     ## kill listener menu
@@ -401,6 +412,20 @@ class MainMenu :
                             self.print_menu()
                     
                     lm_kill_back = False
+
+
+    def start_listener(self, cmd):
+
+        # listeners[name] = Listener(name, port, ipaddress)
+        # listeners[name].start()
+
+        if cmd.split()[0] == 'HTTPS':
+            self.listeners[l_name] = HTTP_listener(l_name, '192.168.0.28', 9090, self.stash)
+        self.listeners[l_name].start()
+
+    def kill_listener(self, l_name):
+        #### maybe need to add listener type
+        self.listeners[l_name].stop()
                 
 
 

@@ -54,21 +54,10 @@ def main():
     db = Stash(path.join(out_fold, 'PROJECT_NAME_0.1' + '.db'))
     db.db_init()
 
-
-
-    listeners = OrderedDict()
-    # listeners[name] = Listener(name, port, ipaddress)
-    # listeners[name].start()
-
-    listeners['first_listener'] = HTTP_listener('first_listener', '192.168.0.28', 9090, db)
-    listeners['first_listener'].start()
-
     ### Testing menu - Switch to tabs!!
     mm = MainMenu(db)
     mm.menu_init()
     
-
-    listeners['first_listener'].stop()
     exit(0)
 
 if __name__ == '__main__':
