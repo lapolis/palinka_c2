@@ -309,6 +309,20 @@ class MainMenu :
             ret += f'{high_comm}{c[0]}\n{high_resp}{cr}{Style.RESET_ALL}\n'
         return ret
 
+    def listener_preview(self, listener_entry):
+        # high_comm = f'{Fore.GREEN}{Style.BRIGHT} Task > {Fore.WHITE}'
+        # high_resp = f'{Fore.CYAN} Result > '
+        listeners = self.stash.get_listener(listener_entry)
+        # ret = '\n'
+        # for c in comms:
+        #     cra = c[1].replace('\r','').split('\n')
+        #     cr = cra[0]
+        #     if len(cra) > 1:
+        #         # cr = ''.join([f'{" "*11}{Fore.CYAN}{cc}\n' for cc in cra])
+        #         for i in range(1,len(cra)):
+        #             cr += f'{" "*10}{Fore.CYAN}{cra[i]}\n'
+        #     ret += f'{high_comm}{c[0]}\n{high_resp}{cr}{Style.RESET_ALL}\n'
+        return listener_entry
 
     def listener_menu(self):
         ### Listeners main menu
@@ -344,7 +358,10 @@ class MainMenu :
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
             clear_screen=False,
-            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+            accept_keys=('enter', 'ctrl-e', 'ctrl-w'),
+            preview_command=self.listener_preview,
+            preview_size=0.85,
+            preview_title=f'{Style.BRIGHT}Listener Details{Style.RESET_ALL}'
         )
 
         ### Listener Kill Menu

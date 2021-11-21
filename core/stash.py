@@ -189,6 +189,11 @@ class Stash :
         result = self.sql_get_stash( query )
         return result
 
+    def get_listener(self, listener):
+        query = ''
+        result = self.sql_get_stash( query )
+        return result
+
     def get_agents(self):
         # conn = self.create_connection()
         # result = ''
