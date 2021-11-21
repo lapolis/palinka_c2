@@ -310,9 +310,29 @@ class MainMenu :
         return ret
 
     def listener_preview(self, listener_entry):
-        # high_comm = f'{Fore.GREEN}{Style.BRIGHT} Task > {Fore.WHITE}'
-        # high_resp = f'{Fore.CYAN} Result > '
-        listeners = self.stash.get_listener(listener_entry)
+        if listener_entry in ['NO ACTIVE LISTENERS', 'Back']:
+            return '\nGoing back?\n'
+
+        name = f'{Style.BRIGHT}{Fore.GREEN}'
+        val = f'{Style.BRIGHT}{Fore.CYAN}'
+        ln = listener_entry.split(' ')[-1]
+        listener = self.stash.get_listener(ln)[0]
+        agents_list = self.stash.get_agents(ln)
+        if agents_list == []:
+            agents = 'None you n00b!'
+        else:
+            agents = f'{agents_list[0][0]} - {agents_list[0][1]}'
+            if len(agents_list) > 1:
+                for a in agents_list:
+                    agents += f'\n{val}        {a[0]} - {a[1]}'
+
+        ret = '\n'
+        if listener[0] == 'HTTPS':
+            ret += f'{name}Listener Type: {val}HTTPS\n'
+            ret += f'{name}Listener Name: {val}{ln}\n'
+            ret += f'{name}Listening IP: {val}{listener[1]}\n'
+            ret += f'{name}Listening Port: {val}{listener[2]}\n'
+            ret += f'{name}Agents: {val}{agents}'
         # ret = '\n'
         # for c in comms:
         #     cra = c[1].replace('\r','').split('\n')
@@ -322,7 +342,8 @@ class MainMenu :
         #         for i in range(1,len(cra)):
         #             cr += f'{" "*10}{Fore.CYAN}{cra[i]}\n'
         #     ret += f'{high_comm}{c[0]}\n{high_resp}{cr}{Style.RESET_ALL}\n'
-        return listener_entry
+        ret += f'{Style.RESET_ALL}\n'
+        return ret
 
     def listener_menu(self):
         ### Listeners main menu

@@ -190,11 +190,12 @@ class Stash :
         return result
 
     def get_listener(self, listener):
-        query = ''
-        result = self.sql_get_stash( query )
+        query = 'SELECT list_type,http_ip,http_port FROM key_store WHERE list_name = ? ;'
+        args = (listener, )
+        result = self.sql_get_stash( query, args )
         return result
 
-    def get_agents(self):
+    def get_agents(self, listener=None):
         # conn = self.create_connection()
         # result = ''
         # try:
@@ -205,9 +206,13 @@ class Stash :
         #     error(e)
 
         # conn.close()
-
-        query = 'SELECT agent_name,hostname FROM agents WHERE alive = True ;'
-        result = self.sql_get_stash( query )
+        if listener:
+            query = 'SELECT agent_name,hostname FROM agents WHERE listener_name = ? AND alive = True ;'
+            args = (listener,)
+            result = self.sql_get_stash( query, args )
+        else:
+            query = 'SELECT agent_name,hostname FROM agents WHERE alive = True ;'
+            result = self.sql_get_stash( query )
         return result
 
     def get_agents_comm_list(self, agent):
