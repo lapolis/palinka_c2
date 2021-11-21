@@ -38,6 +38,14 @@ class MainMenu :
         self.listener_types = ['HTTPS', 'back']
         self.listeners = OrderedDict()
 
+        ## init listeners still alive
+        full_list = self.stash.get_listeners(full=True)
+        for ll in full_list:
+            if ll[1] == 'HTTPS':
+                self.listeners[ll[0]] = HTTP_listener(ll[0], ll[2], ll[3], self.stash)
+                self.listeners[ll[0]].start()
+
+
     ### find a way to use only one function (text and state non existing error)
     def cmd_completer(self, text, state):
         options = [cmd for cmd in self.CMD if cmd.startswith(text)]
@@ -368,7 +376,7 @@ class MainMenu :
                 self.on_activate_r()
             else:
                 if lmm_sel == 0:
-                    ## Listeners list menu
+                    ## Listeners list menu "Show Listeners"
                     while not lm_list_back:
                         lm_list_sel = lm_list_menu.show()
 
@@ -391,21 +399,14 @@ class MainMenu :
                     lm_list_back = False
 
                 elif lmm_sel == 1:
-                    ## start listener menu
-                    # readline.parse_and_bind("tab: complete")
-                    # readline.set_completer(self.listener_completer)
-                    # already_running = 1
-                    # while already_running:
-                    #     header = f'\n\n       Start a new listener, Tab is your friend. "back" to go back. <Listener Type> <Args>. Which args? RTFM'
-                    #     cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
-                    #     already_running = self.start_listener(cmd)
+                    ## start listener menu "New Listener"
                     self.start_listener()
                     lmm_back = True
                     self.print_menu()
 
                 
                 elif lmm_sel == 2:
-                    ## kill listener menu
+                    ## kill listener menu "Kill Listener"
                     while not lm_kill_back:
                         lm_kill_sel = lm_kill_menu.show()
 
@@ -479,7 +480,17 @@ class MainMenu :
                         already_running = 0
                         continue
 
-                    self.listeners[l_name] = HTTP_listener(l_name, ip, int(port), self.stash)
+                    if l_name in self.listeners.keys():
+                        error(f'Listener with that name already exist.')
+                        already_running = 0
+                        continue
+                    ############## HERERERERERERERERREREER
+                    elif self.stash.check_ip_n_port(ip, int(port)):
+                        error(f'Port Already in use for that iface.')
+                        already_running = 0
+                        continue
+                    else:
+                        self.listeners[l_name] = HTTP_listener(l_name, ip, int(port), self.stash)
 
             already_running = 0
             self.listeners[l_name].start()

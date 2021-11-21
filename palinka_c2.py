@@ -51,7 +51,7 @@ def main():
         makedirs(dow_fold)
 
     # to fix - arg for project name
-    db = Stash(path.join(out_fold, 'PROJECT_NAME_0.2' + '.db'))
+    db = Stash(path.join(out_fold, 'PROJECT_NAME_0.3' + '.db'))
     db.db_init()
 
     ### Testing menu - Switch to tabs!!

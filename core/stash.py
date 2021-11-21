@@ -81,6 +81,8 @@ class Stash :
             enc_key TEXT, \
             list_name TEXT PRIMARY KEY, \
             list_type TEXT, \
+            http_ip TEXT, \
+            http_port INT, \
             alive BOOLEAN ); """)
 
     def get_task(self, agent):
@@ -169,7 +171,7 @@ class Stash :
         self.sql_stash( 'INSERT INTO commands(command_code, agent_name, command) VALUES(?, ?, ?)', ( code, agent, b64cmd ) )
         self.sql_stash( 'INSERT INTO commands_history(command_code,agent_name,command,output) VALUES(?, ?, ?, ?)', ( code, agent, cmd, "" ))
 
-    def get_listeners(self):
+    def get_listeners(self, full=False):
         # conn = self.create_connection()
         # result = ''
         # try:
@@ -180,8 +182,10 @@ class Stash :
         #     error(e)
 
         # conn.close()
-
-        query = 'SELECT list_name,list_type FROM key_store WHERE alive = True ;'
+        if full:
+            query = 'SELECT list_name,list_type,http_ip,http_port FROM key_store WHERE alive = True ;'
+        else:
+            query = 'SELECT list_name,list_type FROM key_store WHERE alive = True ;'
         result = self.sql_get_stash( query )
         return result
 
@@ -226,10 +230,27 @@ class Stash :
         query = 'SELECT command_code FROM commands_history ;'
         return self.sql_get_stash( query )
 
-    def register_list(self, name, l_type, key):
-        query = 'INSERT INTO key_store(enc_key, list_name, list_type, alive) VALUES( ?, ?, ?, ? )'
-        args = (key, name, l_type, True)
+    def register_list(self, name, l_type, key, ip, port):
+        query = 'INSERT INTO key_store(enc_key, list_name, list_type, http_ip, http_port, alive) VALUES( ?, ?, ?, ?, ?, ? )'
+        args = (key, name, l_type, ip, port, True)
         self.sql_stash( query, args )
+
+    def check_ip_n_port(self, ip, port):
+        if ip == '0.0.0.0':
+            query = 'SELECT http_port FROM key_store WHERE alive = True ;'
+            port_same_ip = self.sql_get_stash( query )
+        else:
+            query = 'SELECT http_port FROM key_store WHERE http_ip = ? OR http_ip = "0.0.0.0" AND alive = True ;'
+            args = (ip,)
+            port_same_ip = self.sql_get_stash( query, args )
+
+        if not port_same_ip:
+            return False
+
+        if any([1 if port == p[0] else 0 for p in port_same_ip]):
+            return True
+        else:
+            return False
 
 
 

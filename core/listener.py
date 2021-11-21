@@ -27,7 +27,7 @@ class HTTP_listener:
         else:
             self.key = key_init()
             # self.stash.sql_stash( '''INSERT INTO key_store(enc_key, list_name, list_type, alive) VALUES( ?, ?, ?, ? )''', (self.key, name, 'HTTPS', 'True') )
-            self.stash.register_list(name, 'HTTPS', self.key)
+            self.stash.register_list(name, 'HTTPS', self.key, ip, port)
 
         html_fold = path.join(getcwd(), 'core' ,'html')
         self.app = Flask(__name__, template_folder=html_fold)
