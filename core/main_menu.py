@@ -247,7 +247,7 @@ class MainMenu :
                     am_list_back = False
                 
                 elif amm_sel == 1:
-                    ## kill listener menu
+                    ## kill agent menu
                     while not am_kill_back:
                         am_kill_sel = am_kill_menu.show()
 
@@ -427,12 +427,11 @@ class MainMenu :
                             lmm_back = True
                             self.on_activate_r()
                         else:
-                            if lm_list_items[lm_list_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
-                                print('do stuff here, probably print all the agents connected')
-                            
-                            lm_list_back = True
-                            lmm_back = True
-                            self.print_menu()
+                            # if lm_list_items[lm_list_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
+                            if lm_list_items[lm_list_sel] in ['NO ACTIVE LISTENERS', 'Back']:
+                                lm_list_back = True
+                                lmm_back = True
+                                self.print_menu()
                     
                     lm_list_back = False
 
@@ -458,7 +457,10 @@ class MainMenu :
                             self.on_activate_r()
                         else:
                             if lm_list_items[lm_kill_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
-                                print('kill stuff here!!')
+                                listener_tokill = lm_list_items[lm_kill_sel].split(' ')[-1]
+                                type_tokill = lm_list_items[lm_kill_sel].split(' ')[0]
+                                self.stash.sql_stash( 'UPDATE key_store SET alive = ? WHERE list_name = ? ;', (False, listener_tokill) )
+                                self.kill_listener(type_tokill,listener_tokill)
 
                             lm_kill_back = True
                             lmm_back = True
@@ -534,12 +536,14 @@ class MainMenu :
             self.listeners[l_name].start()
 
 
-    def kill_listener(self, l_name):
+    def kill_listener(self, l_type, l_name):
         #### maybe need to add listener type
-        if l_name == 'ALL':
-            for ll in self.listeners:
-                self.listeners[ll].stop()
-        else:
+        # if l_name == 'ALL':
+        #     for ll in self.listeners:
+        #         self.listeners[ll].stop()
+        # else:
+        #     self.listeners[l_name].stop()
+        if l_type == 'HTTPS':
             self.listeners[l_name].stop()
                 
 
