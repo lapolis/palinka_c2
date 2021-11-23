@@ -8,7 +8,8 @@ The list:
 - Parse HTTPS endpoints from config file
 - SSL
 - <del>debug log in logger - write to file</del>
-- Auto-Generate (at least) powershell code
+- setup a way to see full list of commands/responses for agents
+- Auto-Generate (at least) powershell code from listener menu
 - stream file by splitting it (like a real C2)
 - <del>check reuse of listeners or bring them up if still alive</del>
 - PornHub c2 w/ postcard call back
