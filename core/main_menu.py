@@ -428,10 +428,13 @@ class MainMenu :
                             self.on_activate_r()
                         else:
                             # if lm_list_items[lm_list_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
-                            if lm_list_items[lm_list_sel] in ['NO ACTIVE LISTENERS', 'Back']:
-                                lm_list_back = True
-                                lmm_back = True
-                                self.print_menu()
+                            if lm_list_items[lm_list_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
+                                success('Generating the beacon.')
+                                warning('Nah, just fucking with you')
+                                error('I am not that smart yet :(')
+                            lm_list_back = True
+                            lmm_back = True
+                            self.print_menu()
                     
                     lm_list_back = False
 
