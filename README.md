@@ -25,6 +25,8 @@ ___
 Well, from now on, it just works.
 Added functionalities:
 - Listener nice info preview
+- Auto generate powershell implant
+- Agents use listener enc key only for init, then switch to agent key
 ### v0.2
 Added functionalities:
 - Interactive menu

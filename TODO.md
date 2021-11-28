@@ -7,7 +7,9 @@ The list:
 - setup a way to see full list of commands/responses for agents
 - Auto-Generate (at least) powershell code from listener menu
 - stream file by splitting it (like a real C2)
+- Agents handshake (pgp key exchange)
 - PornHub c2 w/ postcard call back
+- <del>Single key for each agent</del>
 - <del>debug log in logger - write to file</del>
 - <del>check reuse of listeners or bring them up if still alive</del>
 - <del>check listener alive on init</del>

