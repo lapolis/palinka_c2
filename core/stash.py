@@ -106,8 +106,8 @@ class Stash :
 
     def check_code(self, com_code):
         try:
-            result = [ self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands WHERE command_code = ?)' , ( com_code, ) )[0][0] ]
-            result.append( self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands_history WHERE command_code = ?)' , ( com_code, ) )[0][0] )
+            result = [ self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands WHERE command_code = ?) ;' , ( com_code, ) )[0][0] ]
+            result.append( self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands_history WHERE command_code = ?) ;' , ( com_code, ) )[0][0] )
         except Exception as e:
             error(e)
             result = [0]
@@ -115,19 +115,19 @@ class Stash :
         return sum(result)
 
     def get_key(self, listener):
-        query = 'SELECT enc_key FROM key_store WHERE list_name = ? ;'
+        query = 'SELECT enc_key FROM key_store WHERE list_name = ? AND alive = True;'
         args = ( listener, )
         result = self.sql_get_stash( query, args )
         return result
 
     def del_commands(self, code):
-        self.sql_stash( 'DELETE FROM commands WHERE command_code = ?' , ( code, ) )
+        self.sql_stash( 'DELETE FROM commands WHERE command_code = ? ;' , ( code, ) )
 
     def set_agent_job(self, code, agent, cmd):
         conn = self.create_connection()
         b64cmd = b64encode(cmd.encode()).decode()
-        self.sql_stash( 'INSERT INTO commands(command_code, agent_name, command) VALUES(?, ?, ?)', ( code, agent, b64cmd ) )
-        self.sql_stash( 'INSERT INTO commands_history(command_code,agent_name,command,output) VALUES(?, ?, ?, ?)', ( code, agent, cmd, "" ))
+        self.sql_stash( 'INSERT INTO commands(command_code, agent_name, command) VALUES(?, ?, ?) ;', ( code, agent, b64cmd ) )
+        self.sql_stash( 'INSERT INTO commands_history(command_code,agent_name,command,output) VALUES(?, ?, ?, ?) ;', ( code, agent, cmd, "" ))
 
     def get_listeners(self, full=False):
         if full:
@@ -174,18 +174,24 @@ class Stash :
         self.sql_stash( query, args )
 
     def check_ip_n_port(self, ip, port):
-        if ip == '0.0.0.0':
-            query = 'SELECT http_port FROM key_store WHERE alive = True ;'
-            port_same_ip = self.sql_get_stash( query )
-        else:
-            query = 'SELECT http_port FROM key_store WHERE http_ip = ? OR http_ip = "0.0.0.0" AND alive = True ;'
-            args = (ip,)
-            port_same_ip = self.sql_get_stash( query, args )
+        # if ip == '0.0.0.0':
+        #     query = 'SELECT http_port FROM key_store WHERE alive = True ;'
+        #     port_same_ip = self.sql_get_stash( query )
+        # else:
+        #     query = 'SELECT http_port FROM key_store WHERE http_ip = ? OR http_ip = "0.0.0.0" AND alive = True ;'
+        #     args = (ip,)
+        #     port_same_ip = self.sql_get_stash( query, args )
 
-        if not port_same_ip:
-            return False
+        query = 'SELECT EXISTS(SELECT 1 FROM key_store WHERE http_ip = ? AND http_port = ? AND alive = True );'
+        args = (ip,port)
+        res = self.sql_get_stash( query, args )[0][0]
 
-        if any([1 if port == p[0] else 0 for p in port_same_ip]):
-            return True
-        else:
-            return False
+        # if not port_same_ip:
+        #     return False
+
+        # if any([1 if port == p[0] else 0 for p in port_same_ip]):
+        #     return True
+        # else:
+        #     return False
+
+        return res

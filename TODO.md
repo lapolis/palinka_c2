@@ -2,7 +2,6 @@
 __(*)I am not part of that 0.5% - This stuff might never be done__
 
 The list:
-- do not log back_to.....
 - Parse HTTPS endpoints from config file
 - SSL
 - setup a way to see full list of commands/responses for agents
@@ -10,6 +9,7 @@ The list:
 - stream file by splitting it (like a real C2)
 - Agents handshake (pgp key exchange)
 - PornHub c2 w/ postcard call back
+- <del>do not log back_to.....</del>del>
 - <del>Single key for each agent</del>
 - <del>debug log in logger - write to file</del>
 - <del>check reuse of listeners or bring them up if still alive</del>
