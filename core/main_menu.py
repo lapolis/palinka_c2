@@ -598,7 +598,7 @@ class MainMenu :
                 temp = temp.replace('XXX_listener_ip_placeholder_XXX',l_ip)
                 temp = temp.replace('XXX_listener_port_placeholder_XXX',str(l_port))
                 temp = temp.replace('XXX_listener_key_placeholder_XXX',l_key)
-                final_implant = path.join(out_folder,f'{l_type}_beacon_{name}.ps1')
+                final_implant = path.join(out_folder,f'{l_type}_beacon_{"".join(x for x in name if x.isalnum())}_{"".join(choice(ascii_letters) for i in range(5))}.ps1')
                 with open(final_implant,'w+') as fw:
                     fw.write(temp)
                 success(f'The payload is ready --> {final_implant}')
