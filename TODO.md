@@ -2,6 +2,7 @@
 __(*)I am not part of that 0.5% - This stuff might never be done__
 
 The list:
+- simple-ter-menu fuckup on resize
 - Parse HTTPS endpoints from config file
 - SSL
 - setup a way to see full list of commands/responses for agents
