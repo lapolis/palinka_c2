@@ -6,7 +6,7 @@ I decided to start this things after I saw this [article](https://0xrick.github.
 ### Getting certs ready (for HTTPS listener)
 #### Self signed cert
 ```
-openssl req -x509 -newkey rsa:4096 -nodes -out ./certs/cert.pem -keyout ./certs/key.pem -days 365
+openssl req -x509 -newkey rsa:4096 -nodes -out /<palinka_c2 home folder>/certs/cert.pem -keyout /<palinka_c2 home folder>/certs/key.pem -days 365
 ```
 #### Legit cert
 ```
@@ -14,6 +14,7 @@ sudo certbot --manual --preferred-challenges dns certonly -d www.<domain> -d <do
 ```
 The copy the cert file and private key to the `certs` folder.
 ```
+mkdir /<palinka_c2 home folder>/certs
 sudo cp /etc/letsencrypt/live/<DOMAIN>/fullchain.pem /<palinka_c2 home folder>/certs/cert.pem
 sudo cp /etc/letsencrypt/live/<DOMAIN>/privkey.pem /<palinka_c2 home folder>/certs/key.pem
 sudo chown $USER: /<palinka_c2 home folder>/certs/*
@@ -24,6 +25,7 @@ ___
 ### v0.3
 Well, from now on, it just works.
 Added functionalities:
+- some fixes here and there
 - Listener nice info preview
 - Auto generate powershell implant
 - Agents use listener enc key only for init, then switch to agent key
