@@ -5,6 +5,7 @@ The list:
 - simple-ter-menu fuckup on resize
 - Parse HTTPS endpoints from config file
 - SSL
+- HTTP and HTTPS
 - setup a way to see full list of commands/responses for agents
 - stream file by splitting it (like a real C2)
 - Agents handshake (pgp key exchange)
