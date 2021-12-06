@@ -5,10 +5,10 @@ The list:
 - Parse HTTPS endpoints from config file
 - SSL
 - setup a way to see full list of commands/responses for agents
-- Auto-Generate (at least) powershell code from listener menu
 - stream file by splitting it (like a real C2)
 - Agents handshake (pgp key exchange)
 - PornHub c2 w/ postcard call back
+- <del>Auto-Generate (at least) powershell code from listener menu</del>
 - <del>do not log back_to.....</del>del>
 - <del>Single key for each agent</del>
 - <del>debug log in logger - write to file</del>
