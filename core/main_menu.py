@@ -12,7 +12,7 @@ from ipaddress import ip_address
 from collections import OrderedDict
 from simple_term_menu import TerminalMenu
 
-from os import popen, system, getcwd
+from os import popen, system, getcwd, name, get_terminal_size
 from colorama import Fore, Back, Style
 
 from core.stash import *
@@ -47,6 +47,8 @@ class MainMenu :
                 self.listeners[ll[0]] = HTTP_listener(ll[0], ll[2], ll[3], self.stash)
                 self.listeners[ll[0]].start()
 
+    def clear_screen(self):
+        system('cls' if name == 'nt' else 'clear')
 
     ### find a way to use only one function (text and state non existing error)
     def cmd_completer(self, text, state):
@@ -71,8 +73,10 @@ class MainMenu :
         self.print_menu()
 
     def print_menu(self):
-        system('clear')
-        rows, columns = popen('/usr/bin/stty size', 'r').read().split()
+        self.clear_screen()
+        tsize = get_terminal_size()
+        # rows, columns = popen('/usr/bin/stty size', 'r').read().split()
+        columns, rows = tsize
         # print(f'Rows {rows}')
         # print(f'Columns {columns}')
 
@@ -81,6 +85,7 @@ class MainMenu :
 
         # print(len(self.menu_entry))
         # print(f'{slot}')
+        # print(tsize[1])
         print('''
  
   ██▓███   ▄▄▄       ██▓     ██▓ ███▄    █  ██ ▄█▀▄▄▄          ▄████▄   ░██████ 
@@ -108,8 +113,7 @@ class MainMenu :
         elif menu_to_show == 'Agents':
             self.agents_menu()
         elif menu_to_show == 'Overview':
-            print('Overview Menu HERE!!')
-            self.listener_menu()
+            self.overview_menu()
         elif menu_to_show == 'Quit':
             self.quit_menu()
         # self.sub_init()
@@ -146,7 +150,7 @@ class MainMenu :
                 self.on_activate_r()
             else:
                 if qm_sel == 3:
-                    system('clear')
+                    self.clear_screen()
                     qm_back = True
 
     def agent_list_gen(self):
@@ -221,7 +225,6 @@ class MainMenu :
                 amm_back = True
                 self.on_activate_r()
             else:
-
                 
                 if amm_sel == 0:
                     ## agents list menu
@@ -347,6 +350,40 @@ class MainMenu :
         #     ret += f'{high_comm}{c[0]}\n{high_resp}{cr}{Style.RESET_ALL}\n'
         ret += f'{Style.RESET_ALL}\n'
         return ret
+
+    def overview_menu(self):
+        ### Overview main menu
+        omm_title = '\n\n       Overview\n'
+        ## generate big ass list with all info
+        omm_items = ['test','test2']
+        omm_back = False
+        omm = TerminalMenu(
+            menu_entries=omm_items,
+            title=omm_title,
+            menu_cursor=self.cursor,
+            menu_cursor_style=self.cursor_style,
+            menu_highlight_style=self.h_style,
+            cycle_cursor=True,
+            clear_screen=False,
+            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+        )
+        # while not omm_back:
+        omm_sel = omm.show()
+
+        if omm.chosen_accept_key == 'ctrl-w':
+            omm_back = True
+            self.on_activate_l()
+        elif omm.chosen_accept_key == 'ctrl-e':
+            omm_back = True
+            self.on_activate_r()
+        else:
+            omm_back = True
+
+            self.clear_screen()
+            success(omm_items[omm_sel])
+            self.print_menu()
+
+
 
     def listener_menu(self):
         ### Listeners main menu
