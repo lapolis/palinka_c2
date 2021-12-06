@@ -10,6 +10,7 @@ The list:
 - stream file by splitting it (like a real C2)
 - Agents handshake (pgp key exchange)
 - PornHub c2 w/ postcard call back
+- <del>Multiplatform.. so far..</del>
 - <del>Auto-Generate (at least) powershell code from listener menu</del>
 - <del>do not log back_to.....</del>del>
 - <del>Single key for each agent</del>
