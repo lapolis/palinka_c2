@@ -143,18 +143,22 @@ class Stash :
         result = self.sql_get_stash( query, args )
         return result
 
-    def get_agents(self, listener=None):
+    def get_agents(self, listener=None, full=False):
         if listener:
             query = 'SELECT agent_name,hostname FROM agents WHERE listener_name = ? AND alive = True ;'
             args = (listener,)
             result = self.sql_get_stash( query, args )
+        elif full:
+            query = 'SELECT agent_name,listener_name,remote_ip,hostname,beacon_type FROM agents WHERE alive = True ;'
+            result = self.sql_get_stash( query )
+            # success(result)
         else:
             query = 'SELECT agent_name,hostname FROM agents WHERE alive = True ;'
             result = self.sql_get_stash( query )
         return result
 
     def get_agents_comm_list(self, agent):
-        query = 'SELECT command,output FROM commands_history WHERE agent_name = ? ;'
+        query = 'SELECT command,output,time_stamp FROM commands_history WHERE agent_name = ? ;'
         args = ( agent, )
         result = self.sql_get_stash( query, args )
         return result[::-1]
@@ -174,24 +178,8 @@ class Stash :
         self.sql_stash( query, args )
 
     def check_ip_n_port(self, ip, port):
-        # if ip == '0.0.0.0':
-        #     query = 'SELECT http_port FROM key_store WHERE alive = True ;'
-        #     port_same_ip = self.sql_get_stash( query )
-        # else:
-        #     query = 'SELECT http_port FROM key_store WHERE http_ip = ? OR http_ip = "0.0.0.0" AND alive = True ;'
-        #     args = (ip,)
-        #     port_same_ip = self.sql_get_stash( query, args )
-
         query = 'SELECT EXISTS(SELECT 1 FROM key_store WHERE http_ip = ? AND http_port = ? AND alive = True );'
         args = (ip,port)
         res = self.sql_get_stash( query, args )[0][0]
-
-        # if not port_same_ip:
-        #     return False
-
-        # if any([1 if port == p[0] else 0 for p in port_same_ip]):
-        #     return True
-        # else:
-        #     return False
 
         return res

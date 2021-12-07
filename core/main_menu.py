@@ -12,10 +12,11 @@ from ipaddress import ip_address
 from collections import OrderedDict
 from simple_term_menu import TerminalMenu
 
-from os import popen, system, getcwd, name, get_terminal_size
 from colorama import Fore, Back, Style
+from os import popen, system, getcwd, name, get_terminal_size
 
 from core.stash import *
+from core.less import LessPy
 from core.listener import HTTP_listener
 
 class MainMenu :
@@ -111,7 +112,9 @@ class MainMenu :
         elif menu_to_show == 'Overview':
             overview_item = self.overview_menu()
             if overview_item:
-                success(f'WTF {overview_item}')
+                # success(f'WTF {overview_item}')
+                less = LessPy(overview_item, self.stash)
+                less.lessPy()
         elif menu_to_show == 'Quit':
             self.quit_menu()
 
@@ -123,7 +126,6 @@ class MainMenu :
         ### Listeners main menu
         qm_title = '\n\n       Are you sure???\n'
         qm_items = ['No!', 'No!', 'No!', 'Yes', 'No!', 'No!', 'No!']
-        # qm_back = False
         qm = TerminalMenu(
             menu_entries=qm_items,
             title=qm_title,
@@ -138,15 +140,12 @@ class MainMenu :
         qm_sel = qm.show()
         if qm.chosen_accept_key == 'ctrl-w':
             self.on_activate_l()
-            # qm_back = True
         elif qm.chosen_accept_key == 'ctrl-e':
-            # qm_back = True
             self.on_activate_r()
         else:
             if qm_sel == 3:
                 self.quit = True
                 self.clear_screen()
-                # qm_back = True
 
     def agent_list_gen(self):
         ### Agents List
@@ -276,7 +275,7 @@ class MainMenu :
         return command_code
 
     def short_com_hist(self, agent):
-        high_comm = f'{Fore.GREEN}{Style.BRIGHT} Task > {Fore.WHITE}'
+        high_comm = f'{Fore.GREEN}{Style.BRIGHT} Task - {Fore.WHITE}'
         high_resp = f'{Fore.CYAN} Result > '
         comms = self.stash.get_agents_comm_list(agent.split()[0])
         ret = '\n'
@@ -287,7 +286,7 @@ class MainMenu :
                 # cr = ''.join([f'{" "*11}{Fore.CYAN}{cc}\n' for cc in cra])
                 for i in range(1,len(cra)):
                     cr += f'{" "*10}{Fore.CYAN}{cra[i]}\n'
-            ret += f'{high_comm}{c[0]}\n{high_resp}{cr}{Style.RESET_ALL}\n'
+            ret += f'{high_comm}{c[2]} {Fore.GREEN}>{Fore.WHITE} {c[0]}\n{high_resp}{cr}{Style.RESET_ALL}\n'
         return ret
 
     def listener_preview(self, listener_entry):
@@ -319,10 +318,16 @@ class MainMenu :
 
     def overview_menu(self):
         ### Overview main menu
-        omm_title = '\n\n       Overview\n'
+        omm_title = '\n\n       Overview - click to get more info\n'
         ## generate big ass list with all info
-        omm_items = ['test','test2']
-        # omm_back = False
+        omm_items = ['Beacon Name - Listener - Remote IP - Hostname - Beacon Type']
+        items = self.stash.get_agents(full=True)
+
+        for i in items:
+            omm_items.append(f'{i[0]} - {i[1]} - {i[2]} - {i[3]} - {i[4]}')
+
+        omm_items.append('Back')
+
         omm = TerminalMenu(
             menu_entries=omm_items,
             title=omm_title,
@@ -340,9 +345,11 @@ class MainMenu :
         elif omm.chosen_accept_key == 'ctrl-e':
             self.on_activate_r()
         else:
-            self.clear_screen()
-            success('initial')
-            return omm_items[omm_sel]
+            if omm_sel not in [0,len(omm_items)-1]:
+                self.clear_screen()
+                return omm_items[omm_sel]
+            else:
+                return None
 
     def listener_menu(self):
         ### Listeners main menu
