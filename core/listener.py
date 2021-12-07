@@ -13,20 +13,23 @@ from flask import Flask, render_template, request, send_from_directory
 
 class HTTP_listener:
 
-    def __init__(self, name, ip, port, stash):
+    def __init__(self, l_type, name, ip, port, stash):
         self.name = name
         self.ip = ip
         self.port = port
+        self.l_type = l_type
 
         self.stash = stash
         self.filePath = path.join(getcwd(), 'downloads')
+        self.certPath = path.join(getcwd(), 'certs', 'cert.pem')
+        self.privkeyPath = path.join(getcwd(), 'certs', 'key.pem')
 
         key = self.stash.get_key(name)
         if key:
             self.key = key[0][0]
         else:
             self.key = key_init()
-            self.stash.register_list(name, 'HTTPS', self.key, ip, port)
+            self.stash.register_list(name, l_type, self.key, ip, port)
 
         html_fold = path.join(getcwd(), 'core' ,'html')
         self.app = Flask(__name__, template_folder=html_fold)
@@ -110,7 +113,10 @@ class HTTP_listener:
     def run(self):
         # to fix (debug False and logger True)
         self.app.logger.disabled = True
-        self.app.run(port=self.port, host=self.ip, debug=False)
+        if self.l_type == 'HTTPS':
+            self.app.run(port=self.port, host=self.ip, ssl_context=(self.certPath, self.privkeyPath), debug=False)
+        else:
+            self.app.run(port=self.port, host=self.ip, debug=False)
 
     def start(self):
         self.server = Process(name = self.name, target=self.run, args = (), daemon = True)

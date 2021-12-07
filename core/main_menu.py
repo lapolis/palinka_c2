@@ -38,7 +38,7 @@ class MainMenu :
 
         self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'back_to_previous_menu']
 
-        self.listener_types = ['HTTPS', 'back']
+        self.listener_types = ['HTTPS', 'HTTP', 'back']
         self.payloads_types = OrderedDict()
         self.payloads_types['HTTPS'] = ['powershell', 'c++ (soon)']
 
@@ -46,8 +46,8 @@ class MainMenu :
         ## init listeners still alive
         full_list = self.stash.get_listeners(full=True)
         for ll in full_list:
-            if ll[1] == 'HTTPS':
-                self.listeners[ll[0]] = HTTP_listener(ll[0], ll[2], ll[3], self.stash)
+            if ll[1] in ['HTTPS','HTTP']:
+                self.listeners[ll[0]] = HTTP_listener(ll[1], ll[0], ll[2], ll[3], self.stash)
                 self.listeners[ll[0]].start()
 
     def clear_screen(self):
@@ -80,15 +80,8 @@ class MainMenu :
         tsize = get_terminal_size()
         # rows, columns = popen('/usr/bin/stty size', 'r').read().split()
         columns, rows = tsize
-        # print(f'Rows {rows}')
-        # print(f'Columns {columns}')
 
         slot = int(columns) / len(self.menu_entry)
-        # rem = int(columns) % len(self.menu_entry)
-
-        # print(len(self.menu_entry))
-        # print(f'{slot}')
-        # print(tsize[1])
         print('''
  
   ██▓███   ▄▄▄       ██▓     ██▓ ███▄    █  ██ ▄█▀▄▄▄          ▄████▄   ░██████ 
@@ -121,14 +114,10 @@ class MainMenu :
                 success(f'WTF {overview_item}')
         elif menu_to_show == 'Quit':
             self.quit_menu()
-        # self.sub_init()
-
 
     def menu_init(self):
         while not self.quit:
             self.print_menu()
-
-    ### sub menus
 
     def quit_menu(self):
         ### Listeners main menu
@@ -145,21 +134,6 @@ class MainMenu :
             clear_screen=False,
             accept_keys=('enter', 'ctrl-e', 'ctrl-w')
         )
-
-        # while not qm_back:
-        #     qm_sel = qm.show()
-
-        #     if qm.chosen_accept_key == 'ctrl-w':
-        #         self.on_activate_l()
-        #         qm_back = True
-        #     elif qm.chosen_accept_key == 'ctrl-e':
-        #         qm_back = True
-        #         self.on_activate_r()
-        #     else:
-        #         if qm_sel == 3:
-        #             self.quit = True
-        #             self.clear_screen()
-        #             qm_back = True
 
         qm_sel = qm.show()
         if qm.chosen_accept_key == 'ctrl-w':
@@ -187,9 +161,7 @@ class MainMenu :
     def agents_menu(self):
         ### Agents main menu
         amm_title = '\n\n       Agents Menu\n'
-        # amm_items = ['Show Agents', 'Kill Agent', 'Back']
         amm_items = ['Show Agents', 'Kill Agent']
-        # amm_back = False
         amm = TerminalMenu(
             menu_entries=amm_items,
             title=amm_title,
@@ -218,8 +190,6 @@ class MainMenu :
             preview_title=f'{Style.BRIGHT}Short Commands History{Style.RESET_ALL}'
         )
 
-        ### Listener Kill Menu
-        ### use same items fo prev menu
         am_kill_title = '\n\n       Agents Killer\n'
         am_kill_back = False
         am_kill_menu = TerminalMenu(
@@ -233,102 +203,30 @@ class MainMenu :
             accept_keys=('enter', 'ctrl-e', 'ctrl-w')
         )
 
-        # amm_sel = amm.show()
-
-        # agents menu loop [0-2] ['Show agents', 'Kill Agents', 'Back']
-        # while not amm_back:
-        #     amm_sel = amm.show()
-
-        #     if amm.chosen_accept_key == 'ctrl-w':
-        #         amm_back = True
-        #         self.on_activate_l()
-        #     elif amm.chosen_accept_key == 'ctrl-e':
-        #         amm_back = True
-        #         self.on_activate_r()
-        #     else:
-                
-        #         if amm_sel == 0:
-        #             ## agents list menu
-        #             # find a way to regenerate agent list
-        #             # am_list_menu.menu_entries = self.agent_list_gen()
-        #             while not am_list_back:
-        #                 am_list_sel = am_list_menu.show()
-
-        #                 if am_list_menu.chosen_accept_key == 'ctrl-w':
-        #                     am_list_back = True
-        #                     amm_back = True
-        #                     self.on_activate_l()
-        #                 elif am_list_menu.chosen_accept_key == 'ctrl-e':
-        #                     am_list_back = True
-        #                     amm_back = True
-        #                     self.on_activate_r()
-        #                 else:
-        #                     if am_list_items[am_list_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
-        #                         task_input = self.get_task_input(am_list_items[am_list_sel].split()[0])
-                                
-        #                     am_list_back = True
-        #                     amm_back = True
-        #                     self.print_menu()
-                    
-        #             am_list_back = False
-                
-        #         elif amm_sel == 1:
-        #             ## kill agent menu
-        #             while not am_kill_back:
-        #                 am_kill_sel = am_kill_menu.show()
-
-        #                 if am_kill_menu.chosen_accept_key == 'ctrl-w':
-        #                     am_kill_back = True
-        #                     amm_back = True
-        #                     self.on_activate_l()
-        #                 elif am_kill_menu.chosen_accept_key == 'ctrl-e':
-        #                     am_kill_back = True
-        #                     amm_back = True
-        #                     self.on_activate_r()
-        #                 else:
-        #                     if am_list_items[am_kill_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
-        #                         agent = am_list_items[am_kill_sel].split()[0]
-        #                         command_code = self.gen_command_code()
-        #                         cmd = 'quit'
-        #                         self.stash.set_agent_job(command_code, agent, cmd)
-        #                         self.stash.sql_stash( 'UPDATE agents SET alive = ? WHERE agent_name = ? ;', (False, agent) )
-
-        #                     am_kill_back = True
-        #                     amm_back = True
-        #                     self.print_menu()
-
-        #             am_kill_back = False
-
         amm_sel = amm.show()
         if amm.chosen_accept_key == 'ctrl-w':
-            # amm_back = True
             self.on_activate_l()
         elif amm.chosen_accept_key == 'ctrl-e':
-            # amm_back = True
             self.on_activate_r()
         else:
             
             if amm_sel == 0:
                 ## agents list menu
                 # find a way to regenerate agent list
-                # am_list_menu.menu_entries = self.agent_list_gen()
                 while not am_list_back:
                     am_list_sel = am_list_menu.show()
 
                     if am_list_menu.chosen_accept_key == 'ctrl-w':
                         am_list_back = True
-                        # amm_back = True
                         self.on_activate_l()
                     elif am_list_menu.chosen_accept_key == 'ctrl-e':
                         am_list_back = True
-                        # amm_back = True
                         self.on_activate_r()
                     else:
                         if am_list_items[am_list_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
                             task_input = self.get_task_input(am_list_items[am_list_sel].split()[0])
                             
                         am_list_back = True
-                        # amm_back = True
                         self.print_menu()
                 
                 am_list_back = False
@@ -340,11 +238,9 @@ class MainMenu :
 
                     if am_kill_menu.chosen_accept_key == 'ctrl-w':
                         am_kill_back = True
-                        # amm_back = True
                         self.on_activate_l()
                     elif am_kill_menu.chosen_accept_key == 'ctrl-e':
                         am_kill_back = True
-                        # amm_back = True
                         self.on_activate_r()
                     else:
                         if am_list_items[am_kill_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
@@ -355,11 +251,7 @@ class MainMenu :
                             self.stash.sql_stash( 'UPDATE agents SET alive = ? WHERE agent_name = ? ;', (False, agent) )
 
                         am_kill_back = True
-                        # amm_back = True
                         self.print_menu()
-
-                    ### maybe not this one ???
-                    # am_kill_back = False
 
     def get_task_input(self, agent):
         readline.parse_and_bind("tab: complete")
@@ -416,21 +308,12 @@ class MainMenu :
                     agents += f'\n{val}        {a[0]} - {a[1]}'
 
         ret = '\n'
-        if listener[0] == 'HTTPS':
-            ret += f'{name}Listener Type: {val}HTTPS\n'
+        if listener[0] in ['HTTPS','HTTP']:
+            ret += f'{name}Listener Type: {val}{listener[0]}\n'
             ret += f'{name}Listener Name: {val}{ln}\n'
             ret += f'{name}Listening IP: {val}{listener[1]}\n'
             ret += f'{name}Listening Port: {val}{listener[2]}\n'
             ret += f'{name}Agents: {val}{agents}'
-        # ret = '\n'
-        # for c in comms:
-        #     cra = c[1].replace('\r','').split('\n')
-        #     cr = cra[0]
-        #     if len(cra) > 1:
-        #         # cr = ''.join([f'{" "*11}{Fore.CYAN}{cc}\n' for cc in cra])
-        #         for i in range(1,len(cra)):
-        #             cr += f'{" "*10}{Fore.CYAN}{cra[i]}\n'
-        #     ret += f'{high_comm}{c[0]}\n{high_resp}{cr}{Style.RESET_ALL}\n'
         ret += f'{Style.RESET_ALL}\n'
         return ret
 
@@ -450,17 +333,13 @@ class MainMenu :
             clear_screen=False,
             accept_keys=('enter', 'ctrl-e', 'ctrl-w')
         )
-        # while not omm_back:
         omm_sel = omm.show()
 
         if omm.chosen_accept_key == 'ctrl-w':
-            # omm_back = True
             self.on_activate_l()
         elif omm.chosen_accept_key == 'ctrl-e':
-            # omm_back = True
             self.on_activate_r()
         else:
-            # omm_back = True
             self.clear_screen()
             success('initial')
             return omm_items[omm_sel]
@@ -468,9 +347,7 @@ class MainMenu :
     def listener_menu(self):
         ### Listeners main menu
         lmm_title = '\n\n       Listeners Menu\n'
-        # lmm_items = ['Show Listeners', 'Kill Listener', 'Back']
         lmm_items = ['Show Listeners', 'New Listener', 'Kill Listener']
-        # lmm_back = False
         lmm = TerminalMenu(
             menu_entries=lmm_items,
             title=lmm_title,
@@ -520,106 +397,11 @@ class MainMenu :
             accept_keys=('enter', 'ctrl-e', 'ctrl-w')
         )
 
-        # Listeners menu loop [0-2] ['Show Listeners', 'Kill Listener', 'Back']
-        # while not lmm_back:
-            # lmm_sel = lmm.show()
-
-            # if lmm.chosen_accept_key == 'ctrl-w':
-            #     lmm_back = True
-            #     self.on_activate_l()
-            # elif lmm.chosen_accept_key == 'ctrl-e':
-            #     lmm_back = True
-            #     self.on_activate_r()
-            # else:
-            #     if lmm_sel == 0:
-            #         ## Listeners list menu "Show Listeners"
-            #         while not lm_list_back:
-            #             lm_list_sel = lm_list_menu.show()
-
-            #             if lm_list_menu.chosen_accept_key == 'ctrl-w':
-            #                 lm_list_back = True
-            #                 lmm_back = True
-            #                 self.on_activate_l()
-            #             elif lm_list_menu.chosen_accept_key == 'ctrl-e':
-            #                 lm_list_back = True
-            #                 lmm_back = True
-            #                 self.on_activate_r()
-            #             else:
-            #                 # if lm_list_items[lm_list_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
-            #                 listener_string = lm_list_items[lm_list_sel]
-            #                 if listener_string not in ['NO ACTIVE LISTENERS', 'Back']:
-            #                     ## Payload creator menu
-            #                     payload_menu_title = '\n\n       Choose the payload type\n'
-            #                     payload_menu_back = False
-            #                     payload_types_array = self.payloads_types[listener_string.split()[0]]
-            #                     payload_menu = TerminalMenu(
-            #                         menu_entries=payload_types_array,
-            #                         title=payload_menu_title,
-            #                         menu_cursor=self.cursor,
-            #                         menu_cursor_style=self.cursor_style,
-            #                         menu_highlight_style=self.h_style,
-            #                         cycle_cursor=True,
-            #                         clear_screen=False,
-            #                         accept_keys=('enter', 'ctrl-e', 'ctrl-w')
-            #                         # preview_command=self.listener_preview,
-            #                         # preview_size=0.85,
-            #                         # preview_title=f'{Style.BRIGHT}Listener Details{Style.RESET_ALL}'
-            #                     )
-            #                     while not payload_menu_back:
-            #                         payload_menu_sel = payload_menu.show()
-            #                         self.create_payload(listener_string.split()[-1], payload_types_array[payload_menu_sel])
-            #                         payload_menu_back = True
-
-            #                     # success('Generating the beacon.')
-            #                     # warning('Nah, just fucking with you')
-            #                     # error('I am not that smart yet :(')
-
-            #                 lm_list_back = True
-            #                 lmm_back = True
-            #                 self.print_menu()
-                    
-            #         lm_list_back = False
-
-            #     elif lmm_sel == 1:
-            #         ## start listener menu "New Listener"
-            #         self.start_listener()
-            #         lmm_back = True
-            #         self.print_menu()
-
-                
-            #     elif lmm_sel == 2:
-            #         ## kill listener menu "Kill Listener"
-            #         while not lm_kill_back:
-            #             lm_kill_sel = lm_kill_menu.show()
-
-            #             if lm_kill_menu.chosen_accept_key == 'ctrl-w':
-            #                 lm_kill_back = True
-            #                 lmm_back = True
-            #                 self.on_activate_l()
-            #             elif lm_kill_menu.chosen_accept_key == 'ctrl-e':
-            #                 lm_kill_back = True
-            #                 lmm_back = True
-            #                 self.on_activate_r()
-            #             else:
-            #                 if lm_list_items[lm_kill_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
-            #                     listener_tokill = lm_list_items[lm_kill_sel].split()[-1]
-            #                     type_tokill = lm_list_items[lm_kill_sel].split()[0]
-            #                     self.stash.sql_stash( 'UPDATE key_store SET alive = ? WHERE list_name = ? ;', (False, listener_tokill) )
-            #                     self.kill_listener(type_tokill,listener_tokill)
-
-            #                 lm_kill_back = True
-            #                 lmm_back = True
-            #                 self.print_menu()
-                    
-            #         lm_kill_back = False
-
         lmm_sel = lmm.show()
 
         if lmm.chosen_accept_key == 'ctrl-w':
-            # lmm_back = True
             self.on_activate_l()
         elif lmm.chosen_accept_key == 'ctrl-e':
-            # lmm_back = True
             self.on_activate_r()
         else:
             if lmm_sel == 0:
@@ -629,11 +411,9 @@ class MainMenu :
 
                     if lm_list_menu.chosen_accept_key == 'ctrl-w':
                         lm_list_back = True
-                        # lmm_back = True
                         self.on_activate_l()
                     elif lm_list_menu.chosen_accept_key == 'ctrl-e':
                         lm_list_back = True
-                        # lmm_back = True
                         self.on_activate_r()
                     else:
                         # if lm_list_items[lm_list_sel] not in ['NO ACTIVE LISTENERS', 'Back']:
@@ -661,22 +441,11 @@ class MainMenu :
                                 self.create_payload(listener_string.split()[-1], payload_types_array[payload_menu_sel])
                                 payload_menu_back = True
 
-                            # success('Generating the beacon.')
-                            # warning('Nah, just fucking with you')
-                            # error('I am not that smart yet :(')
-
                         lm_list_back = True
-                        # lmm_back = True
-                        # self.print_menu()
-                
-                lm_list_back = False
 
             elif lmm_sel == 1:
                 ## start listener menu "New Listener"
                 self.start_listener()
-                # lmm_back = True
-                # self.print_menu()
-
             
             elif lmm_sel == 2:
                 ## kill listener menu "Kill Listener"
@@ -699,18 +468,8 @@ class MainMenu :
                             self.kill_listener(type_tokill,listener_tokill)
 
                         lm_kill_back = True
-                        # lmm_back = True
-                        # self.print_menu()
                 
-                lm_kill_back = False
-
-
     def start_listener(self):
-
-        # listeners[name] = Listener(name, port, ipaddress)
-        # listeners[name].start()
-        # f'\n\n       '
-
         readline.parse_and_bind("tab: complete")
         readline.set_completer(self.listener_completer)
         already_running = 1
@@ -726,13 +485,13 @@ class MainMenu :
                 already_running = 0
                 continue
 
-            elif exp_cmd[0] == 'HTTPS':
+            elif exp_cmd[0] in ['HTTPS','HTTP']:
                 if len(exp_cmd) != 4:
-                    error(f'HTTPS <listener name> <IP> <PORT>')
+                    error(f'<HTTPS|HTTP> <listener name> <IP> <PORT>')
                     already_running = 0
                     continue
                 else:
-                    garbagio,l_name,ip,port = exp_cmd
+                    http_type,l_name,ip,port = exp_cmd
 
                     if ' ' in l_name:
                         error(f'No spaces!')
@@ -770,20 +529,14 @@ class MainMenu :
                         already_running = 0
                         continue
                     else:
-                        self.listeners[l_name] = HTTP_listener(l_name, ip, int(port), self.stash)
+                        self.listeners[l_name] = HTTP_listener(http_type, l_name, ip, int(port), self.stash)
 
             already_running = 0
             self.listeners[l_name].start()
 
 
     def kill_listener(self, l_type, l_name):
-        #### maybe need to add listener type
-        # if l_name == 'ALL':
-        #     for ll in self.listeners:
-        #         self.listeners[ll].stop()
-        # else:
-        #     self.listeners[l_name].stop()
-        if l_type == 'HTTPS':
+        if l_type in ['HTTPS','HTTP']:
             self.listeners[l_name].stop()
 
     def create_payload(self, name, ptype):
@@ -795,7 +548,7 @@ class MainMenu :
         cwd = getcwd()
         template_folder = path.join(cwd, 'beacons')
         out_folder = path.join(cwd, 'payloads')
-        if l_type == 'HTTPS':
+        if l_type in ['HTTPS','HTTP']:
             if ptype == 'powershell':
                 template = path.join(template_folder,'https_beacon.ps1')
                 with open(template,'r') as tr:
@@ -803,6 +556,8 @@ class MainMenu :
                 temp = temp.replace('XXX_listener_ip_placeholder_XXX',l_ip)
                 temp = temp.replace('XXX_listener_port_placeholder_XXX',str(l_port))
                 temp = temp.replace('XXX_listener_key_placeholder_XXX',l_key)
+                if l_type == 'HTTPS':
+                    temp = temp.replace('http','https')
                 final_implant = path.join(out_folder,f'{l_type}_beacon_{"".join(x for x in name if x.isalnum())}_{"".join(choice(ascii_letters) for i in range(5))}.ps1')
                 with open(final_implant,'w+') as fw:
                     fw.write(temp)

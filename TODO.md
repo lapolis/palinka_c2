@@ -4,12 +4,12 @@ __(*)I am not part of that 0.5% - This stuff might never be done__
 The list:
 - simple-ter-menu fuckup on resize
 - Parse HTTPS endpoints from config file
-- SSL
-- HTTP and HTTPS
 - setup a way to see full list of commands/responses for agents
 - stream file by splitting it (like a real C2)
 - Agents handshake (pgp key exchange)
 - PornHub c2 w/ postcard call back
+- <del>HTTP and HTTPS</del>
+- <del>SSL</del>
 - <del>Multiplatform.. so far..</del>
 - <del>Auto-Generate (at least) powershell code from listener menu</del>
 - <del>do not log back_to.....</del>del>
