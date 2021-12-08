@@ -42,7 +42,9 @@ class MainMenu :
 
         self.listener_types = ['HTTPS', 'HTTP', 'back']
         self.payloads_types = OrderedDict()
-        self.payloads_types['HTTPS'] = ['powershell', 'c++ (soon)']
+        # self.payloads_types['HTTPS'] = ['powershell', 'c++ (soon)']
+        self.payloads_types['HTTPS'] = ['powershell']
+        self.payloads_types['HTTP'] = ['powershell']
 
         self.listeners = OrderedDict()
         ## init listeners still alive
