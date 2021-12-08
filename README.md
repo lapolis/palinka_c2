@@ -43,7 +43,7 @@ The HTTP/HTTPS listener consists on a Flask web app composed by the following en
 /tasks/<name>
 # Agent submitting the result of the executed task (code is the task unique code)
 /results/<code>
-# Agent grabbing files to download (simple doing wget for now)
+# Agent grabbing files to download (simply doing wget for now)
 /download/<file>
 ```
 This is NOT MEANT to be a very OPSEC setup. A malleable kinda profile will (maybe) follow sooner or later.

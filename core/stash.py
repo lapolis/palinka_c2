@@ -162,7 +162,7 @@ class Stash :
             result = self.sql_get_stash( query )
             # success(result)
         else:
-            query = 'SELECT agent_name,hostname FROM agents WHERE alive = True ;'
+            query = 'SELECT agent_name,hostname,listener_name FROM agents WHERE alive = True ;'
             result = self.sql_get_stash( query )
         return result
 

