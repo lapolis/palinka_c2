@@ -164,13 +164,13 @@ class MainMenu :
             menu_highlight_style=self.h_kill_style,
             cycle_cursor=True,
             clear_screen=False,
-            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+            accept_keys=('enter', 'a', 'd')
         )
 
         qm_sel = qm.show()
-        if qm.chosen_accept_key == 'ctrl-w':
+        if qm.chosen_accept_key == 'a':
             self.on_activate_l()
-        elif qm.chosen_accept_key == 'ctrl-e':
+        elif qm.chosen_accept_key== 'd':
             self.on_activate_r()
         else:
             if qm_sel == 3:
@@ -199,7 +199,7 @@ class MainMenu :
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
             clear_screen=False,
-            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+            accept_keys=('enter', 'a', 'd')
         )
 
         am_list_title = '\n\n       Select Aget to Interact\n'
@@ -213,7 +213,7 @@ class MainMenu :
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
             clear_screen=False,
-            accept_keys=('enter', 'ctrl-e', 'ctrl-w'),
+            accept_keys=('enter', 'a', 'd'),
             preview_command=self.short_com_hist,
             preview_size=0.60,
             preview_title=f'{Style.BRIGHT}Short Commands History{Style.RESET_ALL}'
@@ -228,13 +228,13 @@ class MainMenu :
             menu_highlight_style=self.h_kill_style,
             cycle_cursor=True,
             clear_screen=False,
-            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+            accept_keys=('enter', 'a', 'd')
         )
 
         amm_sel = amm.show()
-        if amm.chosen_accept_key == 'ctrl-w':
+        if amm.chosen_accept_key == 'a':
             self.on_activate_l()
-        elif amm.chosen_accept_key == 'ctrl-e':
+        elif amm.chosen_accept_key== 'd':
             self.on_activate_r()
         else:
             
@@ -244,10 +244,10 @@ class MainMenu :
                 while not am_list_back:
                     self.menu_banner()
                     am_list_sel = am_list_menu.show()
-                    if am_list_menu.chosen_accept_key == 'ctrl-w':
+                    if am_list_menu.chosen_accept_key == 'a':
                         am_list_back = True
                         self.on_activate_l()
-                    elif am_list_menu.chosen_accept_key == 'ctrl-e':
+                    elif am_list_menu.chosen_accept_key== 'd':
                         am_list_back = True
                         self.on_activate_r()
                     else:
@@ -260,9 +260,9 @@ class MainMenu :
                 ## kill agent menu
                 am_kill_sel = am_kill_menu.show()
 
-                if am_kill_menu.chosen_accept_key == 'ctrl-w':
+                if am_kill_menu.chosen_accept_key == 'a':
                     self.on_activate_l()
-                elif am_kill_menu.chosen_accept_key == 'ctrl-e':
+                elif am_kill_menu.chosen_accept_key== 'd':
                     self.on_activate_r()
                 else:
                     if am_list_items[am_kill_sel] not in ['Back', 'NO ACTIVE AGENTS, you n00b']:
@@ -359,13 +359,13 @@ class MainMenu :
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
             clear_screen=False,
-            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+            accept_keys=('enter', 'a', 'd')
         )
         omm_sel = omm.show()
 
-        if omm.chosen_accept_key == 'ctrl-w':
+        if omm.chosen_accept_key == 'a':
             self.on_activate_l()
-        elif omm.chosen_accept_key == 'ctrl-e':
+        elif omm.chosen_accept_key== 'd':
             self.on_activate_r()
         else:
             if omm_sel != 0:
@@ -386,7 +386,7 @@ class MainMenu :
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
             clear_screen=False,
-            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+            accept_keys=('enter', 'a', 'd')
         )
 
         ### Listeners List
@@ -406,7 +406,7 @@ class MainMenu :
             menu_highlight_style=self.h_style,
             cycle_cursor=True,
             clear_screen=False,
-            accept_keys=('enter', 'ctrl-e', 'ctrl-w'),
+            accept_keys=('enter', 'a', 'd'),
             preview_command=self.listener_preview,
             preview_size=0.85,
             preview_title=f'{Style.BRIGHT}Listener Details{Style.RESET_ALL}'
@@ -423,14 +423,14 @@ class MainMenu :
             menu_highlight_style=self.h_kill_style,
             cycle_cursor=True,
             clear_screen=False,
-            accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+            accept_keys=('enter', 'a', 'd')
         )
 
         lmm_sel = lmm.show()
 
-        if lmm.chosen_accept_key == 'ctrl-w':
+        if lmm.chosen_accept_key == 'a':
             self.on_activate_l()
-        elif lmm.chosen_accept_key == 'ctrl-e':
+        elif lmm.chosen_accept_key== 'd':
             self.on_activate_r()
         else:
             if lmm_sel == 0:
@@ -438,10 +438,10 @@ class MainMenu :
                 while not lm_list_back:
                     lm_list_sel = lm_list_menu.show()
 
-                    if lm_list_menu.chosen_accept_key == 'ctrl-w':
+                    if lm_list_menu.chosen_accept_key == 'a':
                         lm_list_back = True
                         self.on_activate_l()
-                    elif lm_list_menu.chosen_accept_key == 'ctrl-e':
+                    elif lm_list_menu.chosen_accept_key== 'd':
                         lm_list_back = True
                         self.on_activate_r()
                     else:
@@ -462,17 +462,17 @@ class MainMenu :
                                 menu_highlight_style=self.h_style,
                                 cycle_cursor=True,
                                 clear_screen=False,
-                                accept_keys=('enter', 'ctrl-e', 'ctrl-w')
+                                accept_keys=('enter', 'a', 'd')
                                 # preview_command=self.listener_preview,
                                 # preview_size=0.85,
                                 # preview_title=f'{Style.BRIGHT}Listener Details{Style.RESET_ALL}'
                             )
 
                             payload_menu_sel = payload_menu.show()
-                            if payload_menu.chosen_accept_key == 'ctrl-w':
+                            if payload_menu.chosen_accept_key == 'a':
                                 lm_list_back = True
                                 self.on_activate_l()
-                            elif payload_menu.chosen_accept_key == 'ctrl-e':
+                            elif payload_menu.chosen_accept_key== 'd':
                                 lm_list_back = True
                                 self.on_activate_r()
                             else:
@@ -490,9 +490,9 @@ class MainMenu :
                 ## kill listener menu "Kill Listener"
                 lm_kill_sel = lm_kill_menu.show()
 
-                if lm_kill_menu.chosen_accept_key == 'ctrl-w':
+                if lm_kill_menu.chosen_accept_key == 'a':
                     self.on_activate_l()
-                elif lm_kill_menu.chosen_accept_key == 'ctrl-e':
+                elif lm_kill_menu.chosen_accept_key== 'd':
                     self.on_activate_r()
                 else:
                     if lm_list_items[lm_kill_sel] not in ['NO ACTIVE LISTENERS', 'Back']:

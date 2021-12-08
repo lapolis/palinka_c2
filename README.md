@@ -24,13 +24,7 @@ optional arguments:
                         Just decrypt the DB file and save on disk.
 ```
 The project name / file name will be used to create a Sqlite3 DB that will hold all the information about listeners, encryption keys, agents, commands and so on. The structure is is very simple (so far), easy to explore with sqlitebrowser. 
-The terminal based main menu presents 4 tabs in which you can find all very basic functionalities of a C2 server. To navigate between tabs you can use:
-```
-# to go left
-Ctrl+w
-# to go right
-Ctrl+e
-```
+The terminal based main menu presents 4 tabs in which you can find all very basic functionalities of a C2 server. To navigate between tabs you can use `a` to go left and `d` to go right (ever played cod?).  
 All the tabs are very self explanatory so you go and have fun.  
 When you will have some agents and you want to check the full list of sent commands with relevant responses just go on the `Overview` tab and choose the agent you want to query. At that point, just pretend you are using `less`. Well, almost.. Actually, not even close. You can just scroll up and down basically :).. You can use the arrows or `w` for up and `s` for down. To skip pages just use `PgUp` and `PgDn`. Once you are done with it just press `q` or `Esc`.  
 # Starting Listeners
