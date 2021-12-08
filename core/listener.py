@@ -17,6 +17,7 @@ class HTTP_listener:
         self.ip = ip
         self.port = port
         self.l_type = l_type
+        self.debug = debug
 
         self.stash = stash
         self.filePath = path.join(getcwd(), 'downloads')
@@ -91,7 +92,11 @@ class HTTP_listener:
                 if 'VALID agent renamed to ' in result:
                     agent_name = result.split()[-1]
                     old_name = self.stash.get_agent_from_comm(code)
-                    self.stash.sql_stash( 'UPDATE agents SET agent_name = ? WHERE agent_name = ? ; ', (agent_name, old_name) )
+                    if old_name:
+                        old_name_s = old_name[0][0]
+                        self.stash.set_new_name(agent_name, old_name_s)
+                    else:
+                        error('Agent to rename not found.')
                 return ('', 204)
             else:
                 error(f'Command Code {code} not found!')
@@ -111,7 +116,7 @@ class HTTP_listener:
 
     def run(self):
         # to fix (debug False and logger True)
-        self.app.logger.disabled = True
+        self.app.logger.disabled = not self.debug
         if self.l_type == 'HTTPS':
             self.app.run(port=self.port, host=self.ip, ssl_context=(self.certPath, self.privkeyPath), debug=False)
         else:

@@ -124,10 +124,19 @@ class Stash :
         self.sql_stash( 'DELETE FROM commands WHERE command_code = ? ;' , ( code, ) )
 
     def set_agent_job(self, code, agent, cmd):
-        conn = self.create_connection()
         b64cmd = b64encode(cmd.encode()).decode()
         self.sql_stash( 'INSERT INTO commands(command_code, agent_name, command) VALUES(?, ?, ?) ;', ( code, agent, b64cmd ) )
         self.sql_stash( 'INSERT INTO commands_history(command_code,agent_name,command,output) VALUES(?, ?, ?, ?) ;', ( code, agent, cmd, "" ))
+
+    def set_new_name(self, new_name, old_name):
+        query = ['UPDATE agents SET agent_name = ? WHERE agent_name = ? ; ']
+        query.append('UPDATE commands SET agent_name = ? WHERE agent_name = ? ; ' )
+        query.append('UPDATE commands_history SET agent_name = ? WHERE agent_name = ? ; ' )
+        args = (new_name, old_name)
+
+        for q in query:
+            self.sql_stash(q, args)
+
 
     def get_listeners(self, full=False):
         if full:
@@ -164,8 +173,8 @@ class Stash :
         return result[::-1]
 
     def get_agent_from_comm(self, comm):
-        query = 'SELECT agent_name FROM commands WHERE command_code = ? ;'
-        args = ( comm )
+        query = 'SELECT agent_name FROM commands_history WHERE command_code = ? ;'
+        args = ( comm, )
         return self.sql_get_stash( query, args )
 
     def get_command_codes(self):

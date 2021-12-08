@@ -6,6 +6,7 @@ The list:
 - Parse HTTPS endpoints from config file
 - stream file by splitting it (like a real C2)
 - Agents handshake (pgp key exchange) ?
+- Search while in overview mode
 - PornHub c2 w/ postcard call back
 - <del>setup a way to see full list of commands/responses for agents</del>
 - <del>Encrypt DB</del>

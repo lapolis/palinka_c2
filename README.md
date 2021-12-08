@@ -1,16 +1,54 @@
 # palinka_c2 v0.1
 Why am I doing this? Cause I recently started using CobaltStrike for red team operations but I still define as "magic" most of the things that it does behind the scene. So, this is my way to understand things through blood and pain.  
-I decided to start this things after I read a tweet by [0xBoku](https://twitter.com/0xBoku) saying he/they was/were developing a small C2 for initial access and, right after that, I saw this amazing [article/guide](https://0xrick.github.io/misc/c2/) by [Ahmed Hesham](https://twitter.com/ahm3d_h3sham); so at that point I tought to just borrow the code from [0xRick](https://github.com/0xRick/c2) and focus on the implant side.. But things got out of hand.. And here I am, presenting the umpteenth C2 which will slowly die while dependencies will break and functionality will get obsolete.  
+I decided to start this things after I read a tweet by [0xBoku](https://twitter.com/0xBoku) saying he/they was/were developing a small C2 for initial access and, right after that, I saw this amazing [article/guide](https://0xrick.github.io/misc/c2/) by [Ahmed Hesham](https://twitter.com/ahm3d_h3sham); so at that point I thought to just borrow the code from [0xRick](https://github.com/0xRick/c2) and focus on the implant side.. But things got out of hand.. And here I am, presenting the umpteenth C2 which will slowly die while dependencies will break and functionality will get obsolete.  
 ### General boring stuff
-The terminal based main menu presents 4 tabs in which you can find all the most commond functionalities of a C2 server. To navigate between tabs you can use:
+When the option `-j` is used, all the others are ignored. This function is used to just_decrypt a project so you will have sqlite3 DB nicely decrypted for you on disk.  
+If you sue `-p` DO NOT pass the password in the command line, you will be prompted for password.  
+The use of password (encrypted DB) is not mandatory, so you can just run palinka C2 with `-f <project name>` only.  
+If you want to keep all the debug logs from Flask (Requests log) used the flag `-d` and you will have a nice `./debug.log` file.
+
+```
+usage: palinka_c2.py [-h] [-f FILE_NAME] [-d] [-p] [-j JUST_DECRYPT]
+
+Welcome to palinka_c2
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -f FILE_NAME, --file_name FILE_NAME
+                        This name will be used to create the DB with all the logs and information. Letters, numbers and . _ only.
+  -d, --debug           Activate debugging. Everything will be saved in the file ./debug.log.
+  -p, --password        Encrypt DB with password. Password will be asked later.
+  -j JUST_DECRYPT, --just_decrypt JUST_DECRYPT
+                        Just decrypt the DB file and save on disk.
+```
+The terminal based main menu presents 4 tabs in which you can find all the most common functionalities of a C2 server. To navigate between tabs you can use:
 ```
 # to go left
 Ctrl+w
 # to go right
 Ctrl+e
 ```
-
- 
+All the tabs are very self explanatory so you go and have fun.  
+When you will have some agents and you want to check the full list of commands you sent with relevant responses just go on the `Overview` tab and choose the agent you want to query. At that point, just pretend you are using `less`. Well, almost.. Actually, not even close. You can just scroll up and down basically :).. You can use the arrows or `w` for up and `s` for down while to skip pages just use `PgUp` and `PgDn`. Once you are done with it just press `q` or `Esc`.  
+# Starting Listeners
+### HTTP/HTTPS
+The HTTP/HTTPS listener consists on a Flask web app composed by the following endpoints:
+```
+# new beacon registration
+/beacon/register
+# Agent querying for tasks to execute (name is the agent name)
+/tasks/<name>
+# Agent submitting the result of the executed task (code is the task unique code)
+/results/<code>
+# Agent grabbing files to download (simple doing wget for now)
+/download/<file>
+```
+This is NOT MEANT to be a very OPSEC setup. A malleable kinda profile will (maybe) follow sooner or later.
+To create a new HTTP/HTTPS listener got to Listeners > New Listener and input the info following this syntax:
+```
+<HTTPS|HTTP> <listener name> <IP> <PORT>
+```
+At this point, if everything went well, you will find it in the "Show Listeners" menu.
 # Setup
 ### The usual "installation"
 ```
@@ -36,7 +74,7 @@ sudo chown $USER: /<palinka_c2 home folder>/certs/*
 ```
 ___
 
-# Changelog
+# Change log
 ### v0.3
 Well, from now on, it just works.
 Added functionalities:

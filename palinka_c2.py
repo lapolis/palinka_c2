@@ -61,8 +61,11 @@ def main():
 
     if args.just_decrypt:
         name = args.just_decrypt
-    else:
+    elif args.file_name:
         name = args.file_name
+    else:
+        error('I guess you did not input any project name?')
+        exit(1)
 
     valid_chars = f'._{string.ascii_letters}{string.digits}'
     myName = ''.join(c for c in name if c in valid_chars)
@@ -111,7 +114,7 @@ def main():
 
                 db = Stash(dec_db_file)
             else:
-                error('Thid DB is encrypted, you must supply -p so you will be prompted for password.')
+                error('This DB is encrypted, you must supply -p so you will be prompted for password.')
                 exit(1)
         else:
             db = Stash(db_file)

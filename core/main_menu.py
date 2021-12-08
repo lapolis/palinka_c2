@@ -323,8 +323,11 @@ class MainMenu :
         ### Overview main menu
         omm_title = '\n\n       Overview - click to get more info\n'
         ## generate big ass list with all info
-        omm_items = ['Beacon Name - Listener - Remote IP - Hostname - Beacon Type']
         items = self.stash.get_agents(full=True)
+        if items:
+            omm_items = ['Beacon Name - Listener - Remote IP - Hostname - Beacon Type']
+        else:
+            omm_items = ['Throw some agents around you n00b!']
 
         for i in items:
             omm_items.append(f'{i[0]} - {i[1]} - {i[2]} - {i[3]} - {i[4]}')
@@ -368,7 +371,7 @@ class MainMenu :
         )
 
         ### Listeners List
-        lm_list_title = '\n\n       Available Listeners\n'
+        lm_list_title = '\n\n       Available Listeners - Press enter while a listener is highlighted to generate the payload\n'
         listeners = self.stash.get_listeners()
         if listeners:
             lm_list_items = [f'{l[1]} listener - name: {l[0]}' for l in listeners]
@@ -429,8 +432,10 @@ class MainMenu :
                         if listener_string not in ['NO ACTIVE LISTENERS', 'Back']:
                             ## Payload creator menu
                             payload_menu_title = '\n\n       Choose the payload type\n'
-                            payload_menu_back = False
+                            # get payloads for specific listener
                             payload_types_array = self.payloads_types[listener_string.split()[0]]
+                            if payload_types_array[-1] != 'Back':
+                                payload_types_array.append('Back')
                             payload_menu = TerminalMenu(
                                 menu_entries=payload_types_array,
                                 title=payload_menu_title,
@@ -444,12 +449,20 @@ class MainMenu :
                                 # preview_size=0.85,
                                 # preview_title=f'{Style.BRIGHT}Listener Details{Style.RESET_ALL}'
                             )
-                            while not payload_menu_back:
-                                payload_menu_sel = payload_menu.show()
-                                self.create_payload(listener_string.split()[-1], payload_types_array[payload_menu_sel])
-                                payload_menu_back = True
 
-                        lm_list_back = True
+                            payload_menu_sel = payload_menu.show()
+                            if payload_menu.chosen_accept_key == 'ctrl-w':
+                                lm_list_back = True
+                                self.on_activate_l()
+                            elif payload_menu.chosen_accept_key == 'ctrl-e':
+                                lm_list_back = True
+                                self.on_activate_r()
+                            else:
+                                if payload_types_array[payload_menu_sel] != 'Back':
+                                    self.create_payload(listener_string.split()[-1], payload_types_array[payload_menu_sel])
+                                    lm_list_back = True
+                        else:
+                            lm_list_back = True
 
             elif lmm_sel == 1:
                 ## start listener menu "New Listener"
@@ -482,7 +495,7 @@ class MainMenu :
         readline.set_completer(self.listener_completer)
         already_running = 1
         while already_running:
-            header = f'\n\n       Start a new listener, Tab is your friend. "back" to go back. <Listener Type> <Args>. Which args? RTFM'
+            header = f'\n\n       Start a new listener, Tab is your friend. "back" to go back. <Listener Type> <Args>. Which args? Just input the listener type.'
             cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
 
             if cmd == '':
