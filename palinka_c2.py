@@ -94,21 +94,25 @@ def main():
         exit(0)
 
 
-    if path.isfile(db_file) and passwd:
+    if path.isfile(db_file):
         if not check_db(db_file):
-            new_flag = False
-            try:
-                decryptFile(db_file,dec_db_file,passwd)
-            except:
-                error('Wrong passwd or corrupted file.')
-                exit(1)
+            if passwd:
+                new_flag = False
+                try:
+                    decryptFile(db_file,dec_db_file,passwd)
+                except:
+                    error('Wrong passwd or corrupted file.')
+                    exit(1)
 
-            if not check_db(dec_db_file):
-                error('Wrong passwd.')
-                remove(dec_db_file)
-                exit(1)
+                if not check_db(dec_db_file):
+                    error('Wrong passwd.')
+                    remove(dec_db_file)
+                    exit(1)
 
-            db = Stash(dec_db_file)
+                db = Stash(dec_db_file)
+            else:
+                error('Thid DB is encrypted, you must supply -p so you will be prompted for password.')
+                exit(1)
         else:
             db = Stash(db_file)
     else:
