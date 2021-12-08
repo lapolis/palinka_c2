@@ -1,6 +1,6 @@
 # palinka_c2 v0.1
 Why am I doing this? Cause I recently started using CobaltStrike for red team operations but I still define as "magic" most of the things that it does behind the scene. So, this is my way to understand things through blood and pain.  
-I decided to start this things after I read a tweet by [0xBoku](https://twitter.com/0xBoku) saying he was developing a small C2 for initial access and, right after that, I saw this amazing [article/guide](https://0xrick.github.io/misc/c2/) by [Ahmed Hesham](https://twitter.com/ahm3d_h3sham); so at that point I thought to just borrow the code from [0xRick](https://github.com/0xRick/c2) and focus on the implant side.. But things got out of hand.. And here I am, presenting the umpteenth C2 which will slowly die while dependencies will break and functionality will get obsolete.  
+I decided to start this things after I read a tweet by [0xBoku](https://twitter.com/0xBoku) saying he was developing a small C2 for initial access and, right after that, I saw this amazing [article/guide](https://0xrick.github.io/misc/c2/) by [Ahmed Hesham](https://twitter.com/ahm3d_h3sham); so at that point I thought to just *"borrow"* the code from [0xRick](https://github.com/0xRick/c2) and focus on the implant side.. But things got out of hand.. And here I am, presenting the umpteenth C2 which will slowly die while dependencies will break and functionality will get obsolete.  
   
 This tool has been developed and tested on Linux but it **should** be multi platform, let me know if you find out :)
 ### General boring stuff
