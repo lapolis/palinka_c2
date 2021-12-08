@@ -1,6 +1,8 @@
 # palinka_c2 v0.1
 Why am I doing this? Cause I recently started using CobaltStrike for red team operations but I still define as "magic" most of the things that it does behind the scene. So, this is my way to understand things through blood and pain.  
 I decided to start this things after I read a tweet by [0xBoku](https://twitter.com/0xBoku) saying he/they was/were developing a small C2 for initial access and, right after that, I saw this amazing [article/guide](https://0xrick.github.io/misc/c2/) by [Ahmed Hesham](https://twitter.com/ahm3d_h3sham); so at that point I thought to just borrow the code from [0xRick](https://github.com/0xRick/c2) and focus on the implant side.. But things got out of hand.. And here I am, presenting the umpteenth C2 which will slowly die while dependencies will break and functionality will get obsolete.  
+  
+This tool has been developed and tested on Linux but it **should** be multi platform, let me know if you find out :)
 ### General boring stuff
 When the option `-j` is used, all the others are ignored. This function is used to just_decrypt a project so you will have sqlite3 DB nicely decrypted for you on disk.  
 If you use `-p` DO NOT pass the password in the command line, you will be prompted for password.  
@@ -21,6 +23,7 @@ optional arguments:
   -j JUST_DECRYPT, --just_decrypt JUST_DECRYPT
                         Just decrypt the DB file and save on disk.
 ```
+The project name / file name will be used to create a Sqlite3 DB that will hold all the information about listeners, encryption keys, agents, commands and so on. The structure is is very simple (so far), easy to explore with sqlitebrowser. 
 The terminal based main menu presents 4 tabs in which you can find all very basic functionalities of a C2 server. To navigate between tabs you can use:
 ```
 # to go left
