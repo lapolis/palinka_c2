@@ -2,14 +2,14 @@
 __(*)I am not part of that 0.5% - This stuff might never be done__
 
 The list:
-- simple-ter-menu fuckup on resize
+- simple-ter-menu fuckup on resize fix
 - Parse HTTPS endpoints from config file
-- setup a way to see full list of commands/responses for agents
 - stream file by splitting it (like a real C2)
-- Agents handshake (pgp key exchange)
+- Agents handshake (pgp key exchange) ?
 - PornHub c2 w/ postcard call back
-- Encrypt DB
-- Accept args for project name
+- <del>setup a way to see full list of commands/responses for agents</del>
+- <del>Encrypt DB</del>
+- <del>Accept args for project name</del>
 - <del>HTTP and HTTPS</del>
 - <del>SSL</del>
 - <del>Multiplatform.. so far..</del>
