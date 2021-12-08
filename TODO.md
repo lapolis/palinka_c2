@@ -8,6 +8,8 @@ The list:
 - stream file by splitting it (like a real C2)
 - Agents handshake (pgp key exchange)
 - PornHub c2 w/ postcard call back
+- Encrypt DB
+- Accept args for project name
 - <del>HTTP and HTTPS</del>
 - <del>SSL</del>
 - <del>Multiplatform.. so far..</del>

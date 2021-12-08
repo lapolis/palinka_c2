@@ -326,8 +326,6 @@ class MainMenu :
         for i in items:
             omm_items.append(f'{i[0]} - {i[1]} - {i[2]} - {i[3]} - {i[4]}')
 
-        omm_items.append('Back')
-
         omm = TerminalMenu(
             menu_entries=omm_items,
             title=omm_title,
@@ -345,7 +343,7 @@ class MainMenu :
         elif omm.chosen_accept_key == 'ctrl-e':
             self.on_activate_r()
         else:
-            if omm_sel not in [0,len(omm_items)-1]:
+            if omm_sel != 0:
                 self.clear_screen()
                 return omm_items[omm_sel]
             else:
