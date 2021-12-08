@@ -12,7 +12,7 @@ from flask import Flask, render_template, request, send_from_directory
 
 class HTTP_listener:
 
-    def __init__(self, l_type, name, ip, port, stash):
+    def __init__(self, l_type, name, ip, port, stash, debug=False):
         self.name = name
         self.ip = ip
         self.port = port

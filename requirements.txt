@@ -2,3 +2,4 @@ pycryptodome
 flask
 simple-term-menu
 colorama
+pyAesCrypt

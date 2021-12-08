@@ -20,11 +20,12 @@ from core.less import LessPy
 from core.listener import HTTP_listener
 
 class MainMenu :
-    def __init__(self, stash):
+    def __init__(self, stash, debug=False):
         ## testing
         self.quit = False
 
         self.stash = stash
+        self.debug = debug
 
         # general styling
         self.h_style = ('bg_green', 'fg_black', 'italics')
@@ -48,7 +49,7 @@ class MainMenu :
         full_list = self.stash.get_listeners(full=True)
         for ll in full_list:
             if ll[1] in ['HTTPS','HTTP']:
-                self.listeners[ll[0]] = HTTP_listener(ll[1], ll[0], ll[2], ll[3], self.stash)
+                self.listeners[ll[0]] = HTTP_listener(ll[1], ll[0], ll[2], ll[3], self.stash, self.debug)
                 self.listeners[ll[0]].start()
 
     def clear_screen(self):
@@ -534,7 +535,7 @@ class MainMenu :
                         already_running = 0
                         continue
                     else:
-                        self.listeners[l_name] = HTTP_listener(http_type, l_name, ip, int(port), self.stash)
+                        self.listeners[l_name] = HTTP_listener(http_type, l_name, ip, int(port), self.stash, self.debug)
 
             already_running = 0
             self.listeners[l_name].start()
