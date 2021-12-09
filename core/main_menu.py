@@ -280,6 +280,16 @@ class MainMenu :
         while cmd == '' or cmd.split()[0] not in self.CMD:
             cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
         if 'back_to_previous_menu' not in cmd:
+            # if cmd.split()[0] == 'download':
+            #     #### DOWNLOAD FILE HERE COMPLETE!!!
+            #     file_to_zip = ''
+            #     zip_out = ''
+            #     cwd = os.getcwd()
+            #     os.chdir('')
+            #     with zipfile.ZipFile(zip_out,mode='w',compression=zipfile.ZIP_DEFLATED,allowZip64=False,compresslevel=9) as zf:
+            #         zf.write(file_to_zip)
+            #     os.chdir(cwd)
+
             command_code = self.gen_command_code()
             self.stash.set_agent_job(command_code, agent, cmd)
 

@@ -102,10 +102,13 @@ class HTTP_listener:
                 error(f'Command Code {code} not found!')
                 return (render_template(f'404.html', title = '404'), 404)
 
+        # user command input will put the file here with user choosen name
         @self.app.route('/download/<file>', methods=['GET'])
         def download(file):
-            print(path.join(self.filePath, file))
-            if path.isfile(path.join(self.filePath, file)):
+            # print(path.join(self.filePath, file))
+            file_path = path.join(self.filePath, file)
+            if path.isfile(file_path):
+                
                 return (send_from_directory(self.filePath, file, as_attachment=True), 200)
             else:
                 return (render_template(f'404.html', title = '404'), 404)
