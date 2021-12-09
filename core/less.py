@@ -4,10 +4,14 @@ from pynput.keyboard import Key, Listener
 from os import get_terminal_size, system, name
 
 class LessPy :
-    def __init__(self, info_string, stash):
+    def __init__(self, agent_name, stash):
         # Beacon Name - Listener - Remote IP - Hostname - Beacon Type
         self.stash = stash
-        self.a_name,self.l_name,self.ip,self.h_name,self.t_beacon = info_string.split(' - ')
+        
+        # self.a_name,self.l_name,self.ip,self.h_name,self.t_beacon,self.alive,self.time_stamp = info_string.split(' - ')
+        agent_info = self.stash.get_agents(full=True,agent=agent_name)[0]
+        self.a_name,self.l_name,self.ip,self.h_name,self.t_beacon,self.alive,self.time_stamp = agent_info
+        
         self.columns, self.rows = get_terminal_size()
         self.rows -= 1
         self.full_list = self.gen_list(self.a_name, self.l_name)
@@ -72,6 +76,16 @@ class LessPy :
         intro = f'{Style.BRIGHT}Full command list fort aget {Fore.GREEN}{agent}{Fore.WHITE} connected to {Fore.GREEN}{listener}{Fore.WHITE}'
         c_intro = [intro[index : index + self.columns] for index in range(0,len(intro), self.columns)]
         ret += c_intro
+        ret.append(f'First seen: {Fore.GREEN}{self.time_stamp}{Fore.WHITE}')
+        if self.alive:
+            general_data = f'Current status: {Fore.GREEN}Alive{Fore.WHITE}'
+        else:
+            general_data = f'Current status: {Fore.RED}Dead{Fore.WHITE}'
+        c_general_data = [general_data[index : index + self.columns] for index in range(0,len(general_data), self.columns)]
+        ret += c_general_data
+        ret.append(f'Agent IP: {Fore.GREEN}{self.ip}{Fore.WHITE}')
+        ret.append(f'Agent Hostname: {Fore.GREEN}{self.h_name}{Fore.WHITE}')
+        ret.append(f'Agent Type: {Fore.GREEN}{self.t_beacon}{Fore.WHITE}')
         ret.append(' ')
         high_comm = f'{Fore.GREEN}{Style.BRIGHT}Task - {Fore.WHITE}'
         high_resp = f'{Fore.CYAN}Result > '

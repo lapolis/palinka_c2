@@ -62,7 +62,8 @@ class Stash :
             hostname TEXT, \
             beacon_type TEXT, \
             enc_key TEXT, \
-            alive BOOLEAN); """)
+            alive BOOLEAN, \
+            time_stamp DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')) ); """)
 
         self.sql_stash(""" CREATE TABLE IF NOT EXISTS commands (
             command_code TEXT PRIMARY KEY, \
@@ -152,14 +153,19 @@ class Stash :
         result = self.sql_get_stash( query, args )
         return result
 
-    def get_agents(self, listener=None, full=False):
+    def get_agents(self, listener=None, full=False, agent=None):
         if listener:
             query = 'SELECT agent_name,hostname FROM agents WHERE listener_name = ? AND alive = True ;'
             args = (listener,)
             result = self.sql_get_stash( query, args )
         elif full:
-            query = 'SELECT agent_name,listener_name,remote_ip,hostname,beacon_type FROM agents WHERE alive = True ;'
-            result = self.sql_get_stash( query )
+            if agent:
+                query = 'SELECT agent_name,listener_name,remote_ip,hostname,beacon_type,alive,time_stamp FROM agents WHERE agent_name = ? ;'
+                args = ( agent, )
+                result = self.sql_get_stash( query, args )
+            else:
+                query = 'SELECT agent_name,listener_name,remote_ip,hostname,beacon_type,alive,time_stamp FROM agents ORDER BY alive DESC ;'
+                result = self.sql_get_stash( query )
             # success(result)
         else:
             query = 'SELECT agent_name,hostname,listener_name FROM agents WHERE alive = True ;'

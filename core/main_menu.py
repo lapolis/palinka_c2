@@ -38,7 +38,7 @@ class MainMenu :
         self.index = 0
         self.menu_entry = ['Listeners', 'Agents', 'Overview', 'Quit']
 
-        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'back_to_previous_menu']
+        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'download', 'back_to_previous_menu']
 
         self.listener_types = ['HTTPS', 'HTTP', 'back']
         self.payloads_types = OrderedDict()
@@ -140,10 +140,10 @@ class MainMenu :
         elif menu_to_show == 'Agents':
             self.agents_menu()
         elif menu_to_show == 'Overview':
-            overview_item = self.overview_menu()
-            if overview_item:
-                # success(f'WTF {overview_item}')
-                less = LessPy(overview_item, self.stash)
+            agent_name = self.overview_menu()
+            if agent_name:
+                # success(f'WTF {agent_name}')
+                less = LessPy(agent_name, self.stash)
                 less.lessPy()
         elif menu_to_show == 'Quit':
             self.quit_menu()
@@ -344,12 +344,17 @@ class MainMenu :
         ## generate big ass list with all info
         items = self.stash.get_agents(full=True)
         if items:
-            omm_items = ['Beacon Name - Listener - Remote IP - Hostname - Beacon Type']
+            omm_items = [f'{"Beacon Name".ljust(15)} - {"Listener".ljust(15)} - {"Remote IP".ljust(15)} - {"Host name".ljust(20)} - {"Agent Type".ljust(10)} - {"First seen".ljust(23)} - Live?']
         else:
             omm_items = ['Throw some agents around you n00b!']
 
         for i in items:
-            omm_items.append(f'{i[0]} - {i[1]} - {i[2]} - {i[3]} - {i[4]}')
+            # check return if changing the order!
+            if i[5]:
+                agent_string = f'{i[0].ljust(15)} - {i[1].ljust(15)} - {i[2].ljust(15)} - {i[3].ljust(20)} - {i[4].ljust(10)} - {i[6].replace("-","/")} - Alive'
+            else:
+                agent_string = f'{i[0].ljust(15)} - {i[1].ljust(15)} - {i[2].ljust(15)} - {i[3].ljust(20)} - {i[4].ljust(10)} - {i[6].replace("-","/")} - Dead'
+            omm_items.append(agent_string)
 
         omm = TerminalMenu(
             menu_entries=omm_items,
@@ -370,7 +375,8 @@ class MainMenu :
         else:
             if omm_sel != 0:
                 self.clear_screen()
-                return omm_items[omm_sel]
+                # return only agent name from whole string
+                return omm_items[omm_sel].split()[0]
             else:
                 return None
 
