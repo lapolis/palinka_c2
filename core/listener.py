@@ -20,7 +20,8 @@ class HTTP_listener:
         self.debug = debug
 
         self.stash = stash
-        self.filePath = path.join(getcwd(), 'downloads')
+        self.downloadPath = path.join(getcwd(), 'downloads')
+        self.uploadPath = path.join(getcwd(), 'uploads')
         self.certPath = path.join(getcwd(), 'certs', 'cert.pem')
         self.privkeyPath = path.join(getcwd(), 'certs', 'key.pem')
 
@@ -103,13 +104,16 @@ class HTTP_listener:
                 return (render_template(f'404.html', title = '404'), 404)
 
         # user command input will put the file here with user choosen name
-        @self.app.route('/download/<file>', methods=['GET'])
+        @self.app.route('/upload/<file>', methods=['GET'])
         def download(file):
             # print(path.join(self.filePath, file))
-            file_path = path.join(self.filePath, file)
-            if path.isfile(file_path):
-                
-                return (send_from_directory(self.filePath, file, as_attachment=True), 200)
+            file_to_split = path.join(self.uploadPath, file)
+            if path.isfile(file_to_split):
+                return (send_from_directory(self.uploadPath, file, as_attachment=True), 200)
+
+                # ## new download function
+                # with open(file_to_split,'rb') as rb:
+
             else:
                 return (render_template(f'404.html', title = '404'), 404)
 
