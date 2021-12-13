@@ -2,6 +2,10 @@
 push_master.sh
 stash/
 payloads/
+uploads/*
+uploads
+downloads
+downloads/*
 *.db
 *.pem
 
