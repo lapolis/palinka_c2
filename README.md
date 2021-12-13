@@ -50,7 +50,7 @@ At this point, if everything went well, you will find it in the "Show Listeners"
 # Setup
 ### The usual "installation"
 ```
-gig clone https://github.com/lapolis/palinka_c2.git
+git clone https://github.com/lapolis/palinka_c2.git
 cd ./palinka_c2
 pip install -r ./requirements.txt
 ```
