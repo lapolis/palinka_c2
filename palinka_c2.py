@@ -41,6 +41,9 @@ def main():
     dow_fold = path.join(cwd, 'downloads')
     if not path.isdir(dow_fold):
         makedirs(dow_fold)
+    up_fold = path.join(cwd, 'uploads')
+    if not path.isdir(up_fold):
+        makedirs(up_fold)
     pay_fold = path.join(cwd, 'payloads')
     if not path.isdir(pay_fold):
         makedirs(pay_fold)

