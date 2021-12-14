@@ -3,10 +3,11 @@ __(*)I am not part of that 0.5% - This stuff might never be done__
 
 The list:
 - check domain/ip for payload gen
-- keep track of last becon time and show it on overview
+- keep track of last beacon time and show it on overview
+- improve upload function (maybe write a temp file and read specific line)
 - stream file by splitting it (like a real C2) download
 - simple-ter-menu fuckup on resize fix
-- chek double agent in listener preview
+- check double agent in listener preview
 - Parse HTTPS endpoints from config file
 - Agents handshake (pgp key exchange) ?
 - Search while in overview mode
@@ -17,7 +18,7 @@ The list:
 - <del>Accept args for project name</del>
 - <del>HTTP and HTTPS</del>
 - <del>SSL</del>
-- <del>Multiplatform.. so far..</del>
+- <del>Multi-platform.. so far..</del>
 - <del>Auto-Generate (at least) powershell code from listener menu</del>
 - <del>do not log back_to.....</del>del>
 - <del>Single key for each agent</del>
