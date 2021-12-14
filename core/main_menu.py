@@ -14,7 +14,7 @@ from collections import OrderedDict
 from simple_term_menu import TerminalMenu
 
 from colorama import Fore, Back, Style
-from os import popen, system, getcwd, name, get_terminal_size, chdir
+from os import popen, system, getcwd, name, get_terminal_size, chdir, remove
 
 from core.stash import *
 from core.less import LessPy
@@ -42,7 +42,7 @@ class MainMenu :
         self.index = 0
         self.menu_entry = ['Listeners', 'Agents', 'Overview', 'Quit']
 
-        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'upload', 'download_XXnotyetXX' 'back_to_previous_menu']
+        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'upload', 'download_XXnotyetXX', 'back_to_previous_menu']
 
         self.listener_types = ['HTTPS', 'HTTP', 'back']
         self.payloads_types = OrderedDict()
@@ -301,6 +301,8 @@ class MainMenu :
 
                     if path.isfile(file_to_zip):
                         zip_out = path.join(self.uploadPath, f'{file_name}.zip')
+                        if path.isfile(zip_out):
+                            remove(zip_out)
                         chdir(path_to_file)
                         with zipfile.ZipFile(zip_out,mode='w',compression=zipfile.ZIP_DEFLATED,allowZip64=False,compresslevel=9) as zf:
                             zf.write(file_name)
