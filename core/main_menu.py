@@ -42,7 +42,7 @@ class MainMenu :
         self.index = 0
         self.menu_entry = ['Listeners', 'Agents', 'Overview', 'Quit']
 
-        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'upload', 'download_XXnotyetXX', 'back_to_previous_menu']
+        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'upload', 'download', 'back_to_previous_menu']
 
         self.listener_types = ['HTTPS', 'HTTP', 'back']
         self.payloads_types = OrderedDict()

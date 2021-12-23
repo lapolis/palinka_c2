@@ -106,7 +106,7 @@ class HTTP_listener:
 
         # user command input will put the file here with user choosen name
         @self.app.route('/upload/<file>', methods=['POST'])
-        def download(file):
+        def upload(file):
             # print(path.join(self.filePath, file))
             file_to_split = path.join(self.uploadPath, file)
             part = request.form.get('part')
@@ -131,6 +131,10 @@ class HTTP_listener:
 
             else:
                 return (render_template(f'404.html', title = '404'), 404)
+
+        @self.app.route('/downloads/<file>', methods=['POST'])
+        def download(file):
+            return ('', 204)
 
         @self.app.errorhandler(404)
         def page_not_found(error):

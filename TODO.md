@@ -2,6 +2,9 @@
 __(*)I am not part of that 0.5% - This stuff might never be done__
 
 The list:
+- add message to upload/download if file does not exists
+- dictionary for upload/download files
+- add empty line on overview menu ---
 - check domain/ip for payload gen
 - keep track of last beacon time and show it on overview
 - improve upload function (maybe write a temp file and read specific line)

