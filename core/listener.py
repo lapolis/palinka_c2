@@ -6,6 +6,7 @@ from core.logger import *
 from core.crypto import *
 from random import choice
 from base64 import b64encode
+from datetime import datetime
 from string import ascii_letters
 from multiprocessing import Process
 from os import path, getcwd
@@ -25,6 +26,9 @@ class HTTP_listener:
         self.uploadPath = path.join(getcwd(), 'uploads')
         self.certPath = path.join(getcwd(), 'certs', 'cert.pem')
         self.privkeyPath = path.join(getcwd(), 'certs', 'key.pem')
+
+        self.u_files = {}
+        self.d_files = {}
 
         key = self.stash.get_key(name)
         if key:
@@ -107,11 +111,14 @@ class HTTP_listener:
         # user command input will put the file here with user choosen name
         @self.app.route('/upload/<file>', methods=['POST'])
         def upload(file):
-            # print(path.join(self.filePath, file))
             file_to_split = path.join(self.uploadPath, file)
-            part = request.form.get('part')
+            
             name = request.form.get('name')
+            enc_part = request.form.get('part')
+            
             key = self.stash.get_agent_key(agent=name)
+            part = DECRYPT(enc_part, key).replace('VALID ','')
+            
             ## optimise this bloody waste of resources
             if path.isfile(file_to_split):
                 # return (send_from_directory(self.uploadPath, file, as_attachment=True), 200)
@@ -134,6 +141,32 @@ class HTTP_listener:
 
         @self.app.route('/downloads/<file>', methods=['POST'])
         def download(file):
+            # info = "$init"
+            # name = "$name"
+            # chunk = "$enc_len"
+            name = request.form.get('name')
+            enc_info = request.form.get('info')
+            enc_chunk = request.form.get('chunk')
+            
+            key = self.stash.get_agent_key(agent=name)
+            info = DECRYPT(enc_info,key).replace('VALID ','')
+            chunk = DECRYPT(enc_chunk,key).replace('VALID ','')
+            part,code = info.split()
+
+            if part == 'init':
+                file_fpath = path.join(self.downloadPath,f'{datetime.now().strftime("%d%m%y-%H%M%S.%s")}_{file}')
+                while (path.isfile(file_fpath)):
+                    # what are the odds right?? xD
+                    file_fpath = path.join(self.downloadPath,f'{datetime.now().strftime("%d%m%y-%H%M%S.%s")}_{file}')
+
+                open(file_fpath,'w+').close()
+                self.stash.set_file(name, code, file, file_fpath, 'download')
+
+                ## create file unique ID, check if it exists already, encrypt it and send it
+                return ('', 200)
+            else:
+                self.stash.get_fileinfo(name, code)
+
             return ('', 204)
 
         @self.app.errorhandler(404)

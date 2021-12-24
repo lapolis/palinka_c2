@@ -86,6 +86,15 @@ class Stash :
             http_port INT, \
             alive BOOLEAN ); """)
 
+        self.sql_stash(""" CREATE TABLE IF NOT EXISTS files_logs (
+            unique_id TEXT PRIMARY KEY,\
+            agent_name TEXT, \
+            file_code TEXT, \
+            file_name TEXT, \
+            file_full_path TEXT , \
+            type TEXT, \
+            time_stamp DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')) ); """)
+
     def get_task(self, agent):
         query = 'SELECT command_code,command FROM commands WHERE agent_name = ? ORDER BY time_stamp ASC LIMIT 1 ;'
         args = ( agent, )
@@ -196,5 +205,17 @@ class Stash :
         query = 'SELECT EXISTS(SELECT 1 FROM key_store WHERE http_ip = ? AND http_port = ? AND alive = True );'
         args = (ip,port)
         res = self.sql_get_stash( query, args )[0][0]
+        return res
 
+    def set_file(self, unique_id, agent_name, code, name, path, updown):
+        query = 'INSERT INTO files_logs(unique_id, agent_name, file_code, file_name, file_full_path, type) VALUES( ?, ?, ?, ?, ?, ? )'
+        args = (unique_id, agent_name, code, name, path, updown)
+        self.sql_stash( query, args )
+
+    def get_fileinfo(self, agent, code):
+        ## do part to check if ID exists already
+        
+        query = 'SELECT file_full_path FROM files_logs WHERE agent = ? AND code = ? AND type = "download");'
+        args = (agent,code)
+        res = self.sql_get_stash( query, args )[0][0]
         return res
