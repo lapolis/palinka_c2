@@ -38,15 +38,22 @@ class Stash :
     def sql_get_stash(self, sql_query , sql_values=None):
         conn = self.create_connection()
         result = []
-        try:
-            c = conn.cursor()
-            if sql_values != None:
-                c.execute(sql_query , sql_values)
-            else:
-                c.execute(sql_query)
-            result = c.fetchall()
-        except Error as e:
-            error(e)
+        # try:
+        #     c = conn.cursor()
+        #     if sql_values != None:
+        #         c.execute(sql_query , sql_values)
+        #     else:
+        #         c.execute(sql_query)
+        #     result = c.fetchall()
+        # except Error as e:
+        #     error(e)
+
+        c = conn.cursor()
+        if sql_values != None:
+            c.execute(sql_query , sql_values)
+        else:
+            c.execute(sql_query)
+        result = c.fetchall()
 
         conn.close()
         return result
@@ -93,6 +100,7 @@ class Stash :
             file_name TEXT, \
             file_full_path TEXT , \
             type TEXT, \
+            leng TEXT, \
             time_stamp DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')) ); """)
 
     def get_task(self, agent):
@@ -207,15 +215,21 @@ class Stash :
         res = self.sql_get_stash( query, args )[0][0]
         return res
 
-    def set_file(self, unique_id, agent_name, code, name, path, updown):
-        query = 'INSERT INTO files_logs(unique_id, agent_name, file_code, file_name, file_full_path, type) VALUES( ?, ?, ?, ?, ?, ? )'
-        args = (unique_id, agent_name, code, name, path, updown)
+    def set_file(self, unique_id, agent_name, code, name, path, updown, leng):
+        query = 'INSERT INTO files_logs(unique_id, agent_name, file_code, file_name, file_full_path, type, leng) VALUES( ?, ?, ?, ?, ?, ?, ? )'
+        args = (unique_id, agent_name, code, name, path, updown, leng)
         self.sql_stash( query, args )
 
-    def get_fileinfo(self, agent, code):
-        ## do part to check if ID exists already
-        
-        query = 'SELECT file_full_path FROM files_logs WHERE agent = ? AND code = ? AND type = "download");'
-        args = (agent,code)
-        res = self.sql_get_stash( query, args )[0][0]
+    def get_fileinfo(self, uid, agent=None, f_hash=None):
+        if not agent:
+            query = 'SELECT EXISTS(SELECT 1 file_full_path FROM files_logs WHERE unique_id = ? );'
+            args = (uid,)
+            res = self.sql_get_stash( query, args )[0][0]
+        else:
+            query = 'SELECT file_full_path,leng FROM files_logs WHERE agent_name = ? AND file_code = ? AND unique_id = ? );'
+            query = 'SELECT file_full_path,leng FROM files_logs WHERE unique_id = ? );'
+            args = (agent,f_hash,uid)
+            args = (uid,)
+            res = self.sql_get_stash( query, args )
+
         return res

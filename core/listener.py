@@ -42,6 +42,13 @@ class HTTP_listener:
 
         self.running = True
 
+        if self.debug:
+            @self.app.before_request
+            def log_request_info():
+                # self.app.logger.debug('Headers: %s', request.headers)
+                if request.get_data():
+                    self.app.logger.debug(f'Body: {request.get_data()}')
+
         @self.app.route('/', methods=['GET'])
         def index():
             return ('Hello there!')
@@ -151,23 +158,49 @@ class HTTP_listener:
             key = self.stash.get_agent_key(agent=name)
             info = DECRYPT(enc_info,key).replace('VALID ','')
             chunk = DECRYPT(enc_chunk,key).replace('VALID ','')
-            part,code = info.split()
+            part,f_hash = info.split()
 
             if part == 'init':
                 file_fpath = path.join(self.downloadPath,f'{datetime.now().strftime("%d%m%y-%H%M%S.%s")}_{file}')
+                uid = ''.join(choice(ascii_letters) for i in range(20))
+                
                 while (path.isfile(file_fpath)):
                     # what are the odds right?? xD
                     file_fpath = path.join(self.downloadPath,f'{datetime.now().strftime("%d%m%y-%H%M%S.%s")}_{file}')
 
-                open(file_fpath,'w+').close()
-                self.stash.set_file(name, code, file, file_fpath, 'download')
-
                 ## create file unique ID, check if it exists already, encrypt it and send it
-                return ('', 200)
-            else:
-                self.stash.get_fileinfo(name, code)
+                while self.stash.get_fileinfo(uid):
+                    uid = ''.join(choice(ascii_letters) for i in range(20))
 
-            return ('', 204)
+                open(file_fpath,'w+').close()
+                self.stash.set_file(uid, name, f_hash, file, file_fpath, 'download', chunk)
+
+                with open('/tmp/debug','a+') as fw:
+                    fw.write(f"chunk - {chunk}\n")
+
+                uid_enc = ENCRYPT(f'VALID {uid}',key)
+                return (uid_enc, 200)
+            else:
+                enc_fid = request.form.get('fid')
+                f_id = DECRYPT(enc_fid,key).replace('VALID ','')
+
+
+                with open('/tmp/debug','a+') as fw:
+                    fw.write(f"fid - {f_id}\n")
+                
+                # full_path,leng = self.stash.get_fileinfo(name, f_hash, f_id)
+                aaaaaaa = self.stash.get_fileinfo(name, f_hash, f_id)
+
+                with open('/tmp/debug','a+') as fw:
+                    fw.write(f"xxx - {aaaaaaa}\n")
+
+                with open(full_path,'wb') as fwb:
+                    fwb.write(chunk)
+
+                if leng-1 == part:
+                    success('file done??')
+
+                return ('', 204)
 
         @self.app.errorhandler(404)
         def page_not_found(error):
