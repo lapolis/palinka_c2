@@ -16,7 +16,7 @@ class Stash :
             # conn.row_factory = lambda cursor, row: row[0]
             return conn
         except Error as e:
-            error(e)
+            error(e,logger=True)
 
         return conn
 
@@ -30,7 +30,7 @@ class Stash :
             else:
             	c.execute(sql_query)
         except Error as e:
-            error(e)
+            error(e,logger=True)
 
         conn.commit()
         conn.close()
@@ -38,15 +38,6 @@ class Stash :
     def sql_get_stash(self, sql_query , sql_values=None):
         conn = self.create_connection()
         result = []
-        # try:
-        #     c = conn.cursor()
-        #     if sql_values != None:
-        #         c.execute(sql_query , sql_values)
-        #     else:
-        #         c.execute(sql_query)
-        #     result = c.fetchall()
-        # except Error as e:
-        #     error(e)
 
         c = conn.cursor()
         if sql_values != None:
@@ -127,7 +118,7 @@ class Stash :
             result = [ self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands WHERE command_code = ?) ;' , ( com_code, ) )[0][0] ]
             result.append( self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands_history WHERE command_code = ?) ;' , ( com_code, ) )[0][0] )
         except Exception as e:
-            error(e)
+            error(e,logger=True)
             result = [0]
             
         return sum(result)
@@ -226,10 +217,14 @@ class Stash :
             args = (uid,)
             res = self.sql_get_stash( query, args )[0][0]
         else:
-            query = 'SELECT file_full_path,leng FROM files_logs WHERE agent_name = ? AND file_code = ? AND unique_id = ? );'
-            query = 'SELECT file_full_path,leng FROM files_logs WHERE unique_id = ? );'
-            args = (agent,f_hash,uid)
-            args = (uid,)
-            res = self.sql_get_stash( query, args )
+            try:
+                query = 'SELECT file_full_path,leng FROM files_logs WHERE agent_name = ? AND file_code = ? AND unique_id = ? ;'
+                # query = 'SELECT file_full_path,leng FROM files_logs WHERE unique_id = ? ;'
+                args = (agent,f_hash,uid)
+                # args = (uid,)
+                res = self.sql_get_stash( query, args )[0]
+            except Error as e:
+                error(e,logger=True)
+                res = ['','']
 
         return res

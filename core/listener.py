@@ -5,7 +5,7 @@ from io import BytesIO
 from core.logger import *
 from core.crypto import *
 from random import choice
-from base64 import b64encode
+from base64 import b64encode,b64decode
 from datetime import datetime
 from string import ascii_letters
 from multiprocessing import Process
@@ -175,30 +175,21 @@ class HTTP_listener:
                 open(file_fpath,'w+').close()
                 self.stash.set_file(uid, name, f_hash, file, file_fpath, 'download', chunk)
 
-                with open('/tmp/debug','a+') as fw:
-                    fw.write(f"chunk - {chunk}\n")
-
                 uid_enc = ENCRYPT(f'VALID {uid}',key)
                 return (uid_enc, 200)
             else:
                 enc_fid = request.form.get('fid')
                 f_id = DECRYPT(enc_fid,key).replace('VALID ','')
+                full_path,leng = self.stash.get_fileinfo(f_id, name, f_hash)
 
+                with open(full_path,'ab') as fwb:
+                    fwb.write(b64decode(chunk))
 
-                with open('/tmp/debug','a+') as fw:
-                    fw.write(f"fid - {f_id}\n")
-                
-                # full_path,leng = self.stash.get_fileinfo(name, f_hash, f_id)
-                aaaaaaa = self.stash.get_fileinfo(name, f_hash, f_id)
-
-                with open('/tmp/debug','a+') as fw:
-                    fw.write(f"xxx - {aaaaaaa}\n")
-
-                with open(full_path,'wb') as fwb:
-                    fwb.write(chunk)
-
-                if leng-1 == part:
-                    success('file done??')
+                if int(leng)-1 <= int(part):
+                    result = f'File downloaded to {full_path}'
+                    enc_taskid = request.form.get('taskid')
+                    taskid = DECRYPT(enc_taskid,key).replace('VALID ','')
+                    self.stash.sql_stash( 'UPDATE commands_history SET output = ? WHERE command_code = ? ; ', (result, taskid) )
 
                 return ('', 204)
 

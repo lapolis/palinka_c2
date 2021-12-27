@@ -1,3 +1,4 @@
+import logging
 from os import system, name
 from datetime import datetime
 from colorama import Fore, Back, Style
@@ -8,11 +9,14 @@ from colorama import Fore, Back, Style
 def clear_screen():
     system('cls' if name == 'nt' else 'clear')
 
-def error(msg):
+def error(msg,logger=False):
     # clear_screen()
     msg = f'\n\n       XX {datetime.now().strftime("%H:%M:%S")} --> {msg}'
-    print( Fore.RED + msg + Style.RESET_ALL + Fore.RESET )
-    input('       Enter to continue.')
+    if logger:
+        logging.debug(msg)
+    else:
+        print( Fore.RED + msg + Style.RESET_ALL + Fore.RESET )
+        input('       Enter to continue.')
 
 def info(msg):
     # clear_screen()
