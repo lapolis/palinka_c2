@@ -109,6 +109,8 @@ sleep $n
 
 $resultl = ("http" + ':' + "//$ip" + ':' + "$port/results/")
 $uploadl = ("http" + ':' + "//$ip" + ':' + "$port/upload/")
+$downloadl = ("http" + ':' + "//$ip" + ':' + "$port/downloads/")
+
 
 for (;;){
 
