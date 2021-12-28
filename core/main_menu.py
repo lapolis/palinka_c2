@@ -42,7 +42,7 @@ class MainMenu :
         self.index = 0
         self.menu_entry = ['Listeners', 'Agents', 'Overview', 'Quit']
 
-        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'upload', 'download_XXnotyetXX', 'back_to_previous_menu']
+        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'upload', 'download', 'back_to_previous_menu']
 
         self.listener_types = ['HTTPS', 'HTTP', 'back']
         self.payloads_types = OrderedDict()
@@ -310,13 +310,13 @@ class MainMenu :
                         command_code = self.gen_command_code()
                         cmd = f'upload {file_name}.zip'
                     else:
+                        error(f'File {file_to_zip} does not exists.')
                         command_code = False
                 else:
                     command_code = self.gen_command_code()
 
                 if command_code:
                     self.stash.set_agent_job(command_code, agent, cmd)
-
             else:
                 error('Not enough Args >.>')
 

