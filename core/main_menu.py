@@ -381,16 +381,17 @@ class MainMenu :
         ## generate big ass list with all info
         items = self.stash.get_agents(full=True)
         if items:
-            omm_items = [f'{"Beacon Name".ljust(15)} - {"Listener".ljust(15)} - {"Remote IP".ljust(15)} - {"Host name".ljust(20)} - {"Agent Type".ljust(10)} - {"First seen".ljust(23)} - Live?']
+            omm_items = [f'{"Beacon Name".ljust(15)} \| {"Listener".ljust(15)} \| {"Remote IP".ljust(15)} \| {"Host name".ljust(20)} \| {"Agent Type".ljust(10)} \| {"First seen".ljust(23)} \| Live?']
+            omm_items.append(f'{"-"*16}\|{"-"*17}\|{"-"*17}\|{"-"*22}\|{"-"*12}\|{"-"*25}\|------')
         else:
             omm_items = ['Throw some agents around you n00b!']
 
         for i in items:
             # check return if changing the order!
             if i[5]:
-                agent_string = f'{i[0].ljust(15)} - {i[1].ljust(15)} - {i[2].ljust(15)} - {i[3].ljust(20)} - {i[4].ljust(10)} - {i[6].replace("-","/")} - Alive'
+                agent_string = f'{i[0].ljust(15)} \| {i[1].ljust(15)} \| {i[2].ljust(15)} \| {i[3].ljust(20)} \| {i[4].ljust(10)} \| {i[6].replace("-","/")} \| Alive'
             else:
-                agent_string = f'{i[0].ljust(15)} - {i[1].ljust(15)} - {i[2].ljust(15)} - {i[3].ljust(20)} - {i[4].ljust(10)} - {i[6].replace("-","/")} - Dead'
+                agent_string = f'{i[0].ljust(15)} \| {i[1].ljust(15)} \| {i[2].ljust(15)} \| {i[3].ljust(20)} \| {i[4].ljust(10)} \| {i[6].replace("-","/")} \| Dead'
             omm_items.append(agent_string)
 
         omm = TerminalMenu(
@@ -410,7 +411,7 @@ class MainMenu :
         elif omm.chosen_accept_key== 'd':
             self.on_activate_r()
         else:
-            if omm_sel != 0:
+            if omm_sel not in [0,1]:
                 self.clear_screen()
                 # return only agent name from whole string
                 return omm_items[omm_sel].split()[0]

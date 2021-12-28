@@ -2,19 +2,18 @@
 __(*)I am not part of that 0.5% - This stuff might never be done__
 
 The list:
-- add message to upload/download if file does not exists
 - dictionary for upload/download files
-- add empty line on overview menu ---
 - check domain/ip for payload gen
 - keep track of last beacon time and show it on overview
-- improve upload function (maybe write a temp file and read specific line)
-- stream file by splitting it (like a real C2) download
 - simple-ter-menu fuckup on resize fix
 - check double agent in listener preview
 - Parse HTTPS endpoints from config file
 - Agents handshake (pgp key exchange) ?
 - Search while in overview mode
 - cpp implant
+- <del>stream file by splitting it (like a real C2) download</del>
+- <del>add empty line on overview menu --- </del>
+- <del>add message to upload/download if file does not exists</del>
 - <del>stream file by splitting it (like a real C2) upload</del>
 - <del>setup a way to see full list of commands/responses for agents</del>
 - <del>Encrypt DB</del>
