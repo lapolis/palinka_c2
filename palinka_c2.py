@@ -22,7 +22,7 @@ def check_db(db_file):
         False
 
 def main():
-    if python_version()[0:3] < '3.7':
+    if python_version()[0:4] < '3.7':
         print('\n\nMake sure you have Python 3.7+ installed, quitting.\n\n')
         exit(1)
 
