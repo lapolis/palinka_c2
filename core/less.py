@@ -59,6 +59,12 @@ class LessPy :
                 self.index -= self.rows
             else:
                 self.index = 0
+        elif key == Key.home:
+            self.index = 0
+        elif key == Key.end:
+            self.index = len(self.full_list)-self.rows
+        # elif k == '/':
+        #     print('\t/', end='')
 
         self.clear_screen()
         for i in range(self.index,(self.index+self.rows)):
