@@ -42,13 +42,13 @@ class MainMenu :
         self.index = 0
         self.menu_entry = ['Listeners', 'Agents', 'Overview', 'Quit']
 
-        self.CMD = ['shell', 'powershell', 'sleep', 'rename', 'upload', 'download', 'back_to_previous_menu']
+        self.CMD = ['shell', 'Powershell', 'sleep', 'rename', 'upload', 'download', 'back_to_previous_menu']
 
         self.listener_types = ['HTTPS', 'HTTP', 'back']
         self.payloads_types = OrderedDict()
         # self.payloads_types['HTTPS'] = ['powershell', 'c++ (soon)']
-        self.payloads_types['HTTPS'] = ['powershell']
-        self.payloads_types['HTTP'] = ['powershell']
+        self.payloads_types['HTTPS'] = ['Powershell']
+        self.payloads_types['HTTP'] = ['Powershell']
 
         self.listeners = OrderedDict()
         ## init listeners still alive
@@ -625,7 +625,7 @@ class MainMenu :
         template_folder = path.join(cwd, 'beacons')
         out_folder = path.join(cwd, 'payloads')
         if l_type in ['HTTPS','HTTP']:
-            if ptype == 'powershell':
+            if ptype == 'Powershell':
                 template = path.join(template_folder,'https_beacon.ps1')
                 with open(template,'r') as tr:
                     temp = tr.read()
