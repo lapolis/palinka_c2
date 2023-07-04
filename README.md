@@ -38,8 +38,9 @@ The HTTP/HTTPS listener consists on a Flask web app composed by the following en
 /tasks/<name>
 # Agent submitting the result of the executed task (code is the task unique code)
 /results/<code>
-# Agent grabbing files to download
+# Agent grabbing files to download/upload
 /download/<file>
+/upload/<file>
 ```
 This is NOT MEANT to be a very OPSEC setup. A malleable kinda profile will (maybe) follow sooner or later.
 To create a new HTTP/HTTPS listener got to Listeners > New Listener and input the info following this syntax:
